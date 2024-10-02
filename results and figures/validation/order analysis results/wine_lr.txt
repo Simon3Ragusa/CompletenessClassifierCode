@@ -1,0 +1,30 @@
+dataset: wine
+ml_method: Logistic Regression
+percentages of missing values injected in each column = [10%, 20%, 30%, 40%]
+seeds (number of runs): 50
+
+Results
+Pos 0: (0, 1, 3, 2) with score 451.0 and perf 0.9001656376961542
+Pos 1: (0, 3, 2, 1) with score 487.0 and perf 0.8985344953775796
+Pos 2: (0, 3, 1, 2) with score 500.0 and perf 0.8983237599466686
+Pos 3: (1, 0, 3, 2) with score 494.0 and perf 0.8982340570751031
+Pos 4: (0, 2, 1, 3) with score 488.0 and perf 0.898171676527717
+Pos 5: (0, 1, 2, 3) with score 528.0 and perf 0.8978766875383777
+Pos 6: (1, 0, 2, 3) with score 526.0 and perf 0.8976355481422849
+Pos 7: (1, 2, 0, 3) with score 521.0 and perf 0.8975164178971773
+Pos 8: (0, 2, 3, 1) with score 521.0 and perf 0.8961816592966673
+Pos 9: (2, 1, 0, 3) with score 562.0 and perf 0.8960391507090164
+Pos 10: (2, 0, 1, 3) with score 568.0 and perf 0.8957230918472451
+Pos 11: (3, 0, 1, 2) with score 561.0 and perf 0.895697851061132
+Pos 12: (2, 0, 3, 1) with score 569.0 and perf 0.8955115347103796
+Pos 13: (1, 3, 0, 2) with score 593.0 and perf 0.8955106711366928
+Pos 14: (1, 3, 2, 0) with score 613.0 and perf 0.8949485680319708
+Pos 15: (2, 3, 0, 1) with score 600.0 and perf 0.8942927009226495
+Pos 16: (1, 2, 3, 0) with score 661.0 and perf 0.8935164365565007
+Pos 17: (2, 1, 3, 0) with score 601.0 and perf 0.8933108033523592
+Pos 18: (3, 0, 2, 1) with score 657.0 and perf 0.8930985287871238
+Pos 19: (2, 3, 1, 0) with score 626.0 and perf 0.8930652838717609
+Pos 20: (3, 2, 1, 0) with score 648.0 and perf 0.8928778365647787
+Pos 21: (3, 1, 0, 2) with score 688.0 and perf 0.8926804870370372
+Pos 22: (3, 1, 2, 0) with score 653.0 and perf 0.8926598196749415
+Pos 23: (3, 2, 0, 1) with score 684.0 and perf 0.8921220322234497

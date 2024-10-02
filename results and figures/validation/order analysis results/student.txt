@@ -1,0 +1,153 @@
+NOTES
+dataset: student
+GPA is the most important features for predicting the target, followed by Absences
+Features: Absences, GPA, Tutoring, ParentalSupport (first two are numerical, last two are categorical)
+Target: GradeClass
+
+Percentages of missing values injected in each column : [20%, 20%, 20%, 20%]
+seeds (number of runs): 50
+----------------------------------------------------------------------------------------------------------------------------
+student
+DecisionTree
+['impute_knn', 'impute_median', 'impute_random_forest', 'impute_logistic_regression'] # suggested imputation methods
+Results
+Pos 0: (2, 3, 1, 0) with score 454.0 and perf 0.7961642075807752
+Pos 1: (3, 2, 0, 1) with score 495.0 and perf 0.7957131157084024
+Pos 2: (1, 3, 2, 0) with score 506.0 and perf 0.7956723791405979
+Pos 3: (3, 2, 1, 0) with score 502.0 and perf 0.7955267258246151
+Pos 4: (1, 2, 3, 0) with score 529.0 and perf 0.795483664797164
+Pos 5: (2, 1, 3, 0) with score 550.0 and perf 0.7953881569201264
+Pos 6: (2, 0, 3, 1) with score 520.0 and perf 0.795234271882414
+Pos 7: (0, 3, 2, 1) with score 530.0 and perf 0.7952062028884894
+Pos 8: (3, 1, 2, 0) with score 541.0 and perf 0.795193570401398
+Pos 9: (0, 3, 1, 2) with score 557.0 and perf 0.7951113408893916
+Pos 10: (2, 0, 1, 3) with score 556.0 and perf 0.7949472139496357
+Pos 11: (2, 3, 0, 1) with score 547.0 and perf 0.7949435132445746
+Pos 12: (2, 1, 0, 3) with score 571.0 and perf 0.7946191374787704
+Pos 13: (3, 1, 0, 2) with score 582.0 and perf 0.7945221570686678
+Pos 14: (1, 3, 0, 2) with score 578.0 and perf 0.7945080664789707
+Pos 15: (3, 0, 1, 2) with score 591.0 and perf 0.7944793518091479
+Pos 16: (3, 0, 2, 1) with score 599.0 and perf 0.794216728464603
+Pos 17: (1, 0, 3, 2) with score 634.0 and perf 0.7939526846183843
+Pos 18: (0, 2, 3, 1) with score 648.0 and perf 0.7939160947763877
+Pos 19: (1, 2, 0, 3) with score 657.0 and perf 0.7937364485651915
+Pos 20: (0, 1, 3, 2) with score 656.0 and perf 0.7935955191684535
+Pos 21: (1, 0, 2, 3) with score 658.0 and perf 0.7935378400143165
+Pos 22: (0, 2, 1, 3) with score 642.0 and perf 0.7933269098450327
+Pos 23: (0, 1, 2, 3) with score 697.0 and perf 0.7929378746364553
+
+
+LogisticRegression
+['impute_random_forest', 'impute_random_forest', 'impute_random_forest', 'impute_standard']
+Results
+Pos 0: (0, 2, 1, 3) with score 431.0 and perf 0.7248976914353203
+Pos 1: (3, 0, 2, 1) with score 410.0 and perf 0.7248976914353203
+Pos 2: (0, 2, 3, 1) with score 469.0 and perf 0.7248976914353203
+Pos 3: (0, 3, 2, 1) with score 462.0 and perf 0.7248976914353203
+Pos 4: (0, 1, 2, 3) with score 494.0 and perf 0.7239718445295752
+Pos 5: (0, 1, 3, 2) with score 482.0 and perf 0.7239718445295752
+Pos 6: (3, 0, 1, 2) with score 508.0 and perf 0.7239718445295752
+Pos 7: (0, 3, 1, 2) with score 528.0 and perf 0.7239718445295752
+Pos 8: (2, 1, 0, 3) with score 491.0 and perf 0.723826147303633
+Pos 9: (3, 2, 1, 0) with score 461.0 and perf 0.723826147303633
+Pos 10: (2, 1, 3, 0) with score 524.0 and perf 0.723826147303633
+Pos 11: (2, 3, 1, 0) with score 536.0 and perf 0.723826147303633
+Pos 12: (2, 0, 3, 1) with score 634.0 and perf 0.7220971000785945
+Pos 13: (2, 0, 1, 3) with score 628.0 and perf 0.7220971000785945
+Pos 14: (3, 2, 0, 1) with score 616.0 and perf 0.7220971000785945
+Pos 15: (2, 3, 0, 1) with score 646.0 and perf 0.7220971000785945
+Pos 16: (1, 2, 3, 0) with score 667.0 and perf 0.7215640797698133
+Pos 17: (1, 2, 0, 3) with score 670.0 and perf 0.7215640797698133
+Pos 18: (3, 1, 2, 0) with score 738.0 and perf 0.7215640797698133
+Pos 19: (1, 3, 2, 0) with score 737.0 and perf 0.7215640797698133
+Pos 20: (1, 3, 0, 2) with score 627.0 and perf 0.7213748987812333
+Pos 21: (1, 0, 3, 2) with score 666.0 and perf 0.7213748987812333
+Pos 22: (1, 0, 2, 3) with score 686.0 and perf 0.7213748987812333
+Pos 23: (3, 1, 0, 2) with score 689.0 and perf 0.7213748987812333
+
+
+KNN
+['impute_knn', 'impute_random_forest', 'impute_mice', 'impute_knn']
+Results
+Pos 0: (3, 2, 0, 1) with score 416.0 and perf 0.8052240053875983
+Pos 1: (2, 3, 0, 1) with score 438.0 and perf 0.8051692528554273
+Pos 2: (2, 0, 1, 3) with score 512.0 and perf 0.8048772658001908
+Pos 3: (0, 1, 2, 3) with score 487.0 and perf 0.8045667376926778
+Pos 4: (2, 1, 3, 0) with score 509.0 and perf 0.8043985465111405
+Pos 5: (2, 1, 0, 3) with score 533.0 and perf 0.8042038946425255
+Pos 6: (2, 0, 3, 1) with score 506.0 and perf 0.8042028000719518
+Pos 7: (0, 1, 3, 2) with score 540.0 and perf 0.8039836851908637
+Pos 8: (3, 0, 1, 2) with score 511.0 and perf 0.803907479060252
+Pos 9: (3, 2, 1, 0) with score 526.0 and perf 0.8038705545088505
+Pos 10: (2, 3, 1, 0) with score 549.0 and perf 0.8037415050939891
+Pos 11: (0, 3, 1, 2) with score 578.0 and perf 0.8034149294933809
+Pos 12: (0, 2, 1, 3) with score 602.0 and perf 0.8032666460552549
+Pos 13: (3, 0, 2, 1) with score 583.0 and perf 0.8031718543060831
+Pos 14: (0, 2, 3, 1) with score 600.0 and perf 0.8030166267117623
+Pos 15: (0, 3, 2, 1) with score 618.0 and perf 0.8029240777568661
+Pos 16: (1, 2, 3, 0) with score 610.0 and perf 0.8028121656116469
+Pos 17: (1, 3, 2, 0) with score 613.0 and perf 0.8026490419553702
+Pos 18: (1, 2, 0, 3) with score 642.0 and perf 0.8023974532397437
+Pos 19: (1, 0, 2, 3) with score 677.0 and perf 0.8023687988503855
+Pos 20: (1, 0, 3, 2) with score 647.0 and perf 0.8023455534570112
+Pos 21: (3, 1, 2, 0) with score 681.0 and perf 0.8019527387195516
+Pos 22: (3, 1, 0, 2) with score 667.0 and perf 0.8019296737267908
+Pos 23: (1, 3, 0, 2) with score 755.0 and perf 0.8012911234088044
+
+
+RandomForest
+['impute_random_forest', 'impute_random_forest', 'impute_random_forest', 'impute_standard']
+Results
+Pos 0: (2, 3, 0, 1) with score 359.0 and perf 0.8206017696777406
+Pos 1: (2, 0, 3, 1) with score 377.0 and perf 0.8206017696777406
+Pos 2: (2, 0, 1, 3) with score 397.0 and perf 0.8206017696777406
+Pos 3: (3, 2, 0, 1) with score 399.0 and perf 0.8206017696777406
+Pos 4: (3, 2, 1, 0) with score 398.0 and perf 0.8198819699732508
+Pos 5: (2, 3, 1, 0) with score 468.0 and perf 0.8198819699732508
+Pos 6: (2, 1, 3, 0) with score 468.0 and perf 0.8198819699732508
+Pos 7: (2, 1, 0, 3) with score 470.0 and perf 0.8198819699732508
+Pos 8: (0, 3, 2, 1) with score 434.0 and perf 0.819567306864951
+Pos 9: (0, 2, 1, 3) with score 432.0 and perf 0.819567306864951
+Pos 10: (3, 0, 2, 1) with score 426.0 and perf 0.819567306864951
+Pos 11: (0, 2, 3, 1) with score 464.0 and perf 0.819567306864951
+Pos 12: (0, 1, 3, 2) with score 623.0 and perf 0.8169066731519414
+Pos 13: (0, 3, 1, 2) with score 646.0 and perf 0.8169066731519414
+Pos 14: (0, 1, 2, 3) with score 671.0 and perf 0.8169066731519414
+Pos 15: (3, 0, 1, 2) with score 680.0 and perf 0.8169066731519414
+Pos 16: (1, 0, 3, 2) with score 719.0 and perf 0.8158874841136003
+Pos 17: (1, 0, 2, 3) with score 758.0 and perf 0.8158874841136003
+Pos 18: (1, 3, 0, 2) with score 731.0 and perf 0.8158874841136003
+Pos 19: (3, 1, 0, 2) with score 764.0 and perf 0.8158874841136003
+Pos 20: (1, 2, 0, 3) with score 743.0 and perf 0.81558901051329
+Pos 21: (1, 2, 3, 0) with score 752.0 and perf 0.81558901051329
+Pos 22: (3, 1, 2, 0) with score 810.0 and perf 0.81558901051329
+Pos 23: (1, 3, 2, 0) with score 811.0 and perf 0.81558901051329
+
+
+AdaBoost
+['impute_random_forest', 'impute_median', 'impute_random_forest', 'impute_standard']
+Results
+Pos 0: (0, 2, 1, 3) with score 458.0 and perf 0.825436250067235
+Pos 1: (3, 0, 2, 1) with score 439.0 and perf 0.825436250067235
+Pos 2: (0, 2, 3, 1) with score 493.0 and perf 0.825436250067235
+Pos 3: (0, 3, 2, 1) with score 492.0 and perf 0.825436250067235
+Pos 4: (2, 3, 0, 1) with score 553.0 and perf 0.8247530407430433
+Pos 5: (2, 0, 3, 1) with score 559.0 and perf 0.8247530407430433
+Pos 6: (2, 0, 1, 3) with score 560.0 and perf 0.8247530407430433
+Pos 7: (3, 2, 0, 1) with score 576.0 and perf 0.8247530407430433
+Pos 8: (0, 1, 2, 3) with score 470.0 and perf 0.8246589283969495
+Pos 9: (0, 1, 3, 2) with score 456.0 and perf 0.8246589283969495
+Pos 10: (3, 0, 1, 2) with score 512.0 and perf 0.8246589283969495
+Pos 11: (0, 3, 1, 2) with score 516.0 and perf 0.8246589283969495
+Pos 12: (1, 2, 3, 0) with score 611.0 and perf 0.8232782024766513
+Pos 13: (1, 2, 0, 3) with score 614.0 and perf 0.8232782024766513
+Pos 14: (1, 3, 2, 0) with score 661.0 and perf 0.8232782024766513
+Pos 15: (3, 1, 2, 0) with score 692.0 and perf 0.8232782024766513
+Pos 16: (2, 1, 0, 3) with score 665.0 and perf 0.8230868473172026
+Pos 17: (2, 1, 3, 0) with score 685.0 and perf 0.8230868473172026
+Pos 18: (2, 3, 1, 0) with score 708.0 and perf 0.8230868473172026
+Pos 19: (3, 2, 1, 0) with score 678.0 and perf 0.8230868473172026
+Pos 20: (1, 3, 0, 2) with score 584.0 and perf 0.8227648279375502
+Pos 21: (1, 0, 3, 2) with score 581.0 and perf 0.8227648279375502
+Pos 22: (1, 0, 2, 3) with score 618.0 and perf 0.8227648279375502
+Pos 23: (3, 1, 0, 2) with score 619.0 and perf 0.8227648279375502

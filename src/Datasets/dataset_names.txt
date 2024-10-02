@@ -1,0 +1,26 @@
+abalone
+BachChoralHarmony
+bank
+cancer
+car
+default of credit card clients
+drug
+electricity-normalized
+fried
+frogs
+german
+house
+iris
+letter
+mushrooms
+mv
+numerai28.6
+nursery
+phoneme
+ringnorm
+Run_or_walk_information
+shuttle
+soybean
+stars
+visualizing_soil
+wall-robot-navigation

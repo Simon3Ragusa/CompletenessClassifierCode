@@ -1,0 +1,30 @@
+dataset: visualizing_galaxy
+ml_method: Logistic Regression
+percentages of missing values injected in each column = [10%, 20%, 30%, 40%]
+seeds (number of runs): 50
+
+Results
+Pos 0: (0, 1, 2, 3) with score 383.0 and perf 0.9285207205372807
+Pos 1: (0, 1, 3, 2) with score 385.0 and perf 0.9282717931594219
+Pos 2: (1, 2, 0, 3) with score 470.0 and perf 0.9258500682724606
+Pos 3: (1, 0, 3, 2) with score 509.0 and perf 0.9250906877920474
+Pos 4: (1, 0, 2, 3) with score 520.0 and perf 0.9249007321188397
+Pos 5: (1, 3, 2, 0) with score 532.0 and perf 0.9244122009823438
+Pos 6: (2, 1, 0, 3) with score 556.0 and perf 0.9244099363085541
+Pos 7: (2, 0, 1, 3) with score 565.0 and perf 0.9243620855202513
+Pos 8: (1, 2, 3, 0) with score 531.0 and perf 0.9242321952406227
+Pos 9: (2, 0, 3, 1) with score 552.0 and perf 0.9240948318991679
+Pos 10: (0, 3, 2, 1) with score 601.0 and perf 0.9238850250449134
+Pos 11: (1, 3, 0, 2) with score 548.0 and perf 0.9236125808016239
+Pos 12: (0, 2, 3, 1) with score 564.0 and perf 0.9235846309118969
+Pos 13: (2, 3, 0, 1) with score 622.0 and perf 0.9228778145231421
+Pos 14: (2, 1, 3, 0) with score 623.0 and perf 0.9227593899652323
+Pos 15: (0, 2, 1, 3) with score 600.0 and perf 0.922715543861441
+Pos 16: (3, 2, 0, 1) with score 600.0 and perf 0.9226945375614685
+Pos 17: (2, 3, 1, 0) with score 621.0 and perf 0.9226933222749966
+Pos 18: (3, 0, 2, 1) with score 613.0 and perf 0.9224673974213498
+Pos 19: (3, 2, 1, 0) with score 628.0 and perf 0.9213753778093329
+Pos 20: (3, 1, 2, 0) with score 631.0 and perf 0.9205831200279988
+Pos 21: (3, 1, 0, 2) with score 651.0 and perf 0.9200811882676656
+Pos 22: (0, 3, 1, 2) with score 732.0 and perf 0.9179196055802038
+Pos 23: (3, 0, 1, 2) with score 763.0 and perf 0.9173963633997669

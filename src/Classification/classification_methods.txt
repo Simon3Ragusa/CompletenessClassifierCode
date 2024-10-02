@@ -1,0 +1,6 @@
+DecisionTree
+LogisticRegression
+KNN
+RandomForest
+AdaBoost
+SVC
