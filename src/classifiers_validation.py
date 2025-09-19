@@ -6,21 +6,21 @@ from sklearn.linear_model import LogisticRegression
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import StratifiedKFold, cross_val_score
-from src.utils import encoding_categorical_variables
+from utils import encoding_categorical_variables
 from sklearn.pipeline import make_pipeline
 from sklearn.dummy import DummyClassifier
-from src.Feature_selection.feature_selection import fixed_fs_univariate
-from src.Imputation.imputation_techniques import impute_missing_column
+from Feature_selection.feature_selection import fixed_fs_univariate
+from Imputation.imputation_techniques import impute_missing_column
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.feature_selection import SelectKBest, mutual_info_classif, f_classif
 from sklearn.preprocessing import OrdinalEncoder
-from src.Column_profile_extraction.numerical import get_features_num
-from src.Column_profile_extraction.categorical import get_features_cat
+from Column_profile_extraction.numerical import get_features_num
+from Column_profile_extraction.categorical import get_features_cat
 from joblib import load, dump
 import itertools
 import warnings
-from src.Datasets.get_dataset import get_dataset
+from Datasets.get_dataset import get_dataset
 
 file_imp_methods_num = open("Imputation/methods_numerical_column.txt", "r")
 file_imp_methods_cat = open("Imputation/methods_categorical_column.txt", "r")

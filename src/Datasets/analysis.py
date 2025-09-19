@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from get_dataset import get_dataset
-from src.Feature_selection.feature_selection import feature_selection_univariate
+from Feature_selection.feature_selection import feature_selection_univariate
 import matplotlib.pyplot as plt
 import seaborn as sns
 

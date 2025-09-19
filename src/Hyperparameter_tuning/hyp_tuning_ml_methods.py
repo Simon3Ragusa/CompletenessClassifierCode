@@ -1,8 +1,8 @@
-from src.Classification.algorithms_class import classification
-from src.Datasets.get_dataset import get_dataset
-from src.utils import encoding_categorical_variables
+from Classification.algorithms_class import classification
+from Datasets.get_dataset import get_dataset
+from utils import encoding_categorical_variables
 import numpy as np
-from src.Feature_selection.feature_selection import remove_corr, fixed_fs_univariate
+from Feature_selection.feature_selection import remove_corr, fixed_fs_univariate
 import time
 import warnings
 warnings.filterwarnings("ignore")

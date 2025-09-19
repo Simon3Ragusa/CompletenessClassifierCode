@@ -3,7 +3,7 @@
 In the _results and figures_ folder you will find the relevant results and figures discussed in the paper.
 
 ## Scripts
-In the _src_ folder you will find the code for this project. In the following, brief descriptions of the most relevant scripts and folders are provided
+In the __ folder you will find the code for this project. In the following, brief descriptions of the most relevant scripts and folders are provided
 - **kb_construction.py**:
   - implementation of the Knowledge Base enrichment process described in Section 4.1. Eight experiments are executed parallelly
   - for each analyzed column, the corresponding units of knowledge _(column profile, classification method, imputation methods scores)_ are extracted, and saved on a file.

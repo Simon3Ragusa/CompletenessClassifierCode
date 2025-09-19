@@ -1,12 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from src.Feature_selection.feature_selection import fixed_fs_univariate
-from src.Imputation.imputation_techniques import impute_missing_column
-from src.classifiers_validation import try_classification
-from src.Column_profile_extraction.numerical import get_features_num
-from src.Column_profile_extraction.categorical import get_features_cat
+from Feature_selection.feature_selection import fixed_fs_univariate
+from Imputation.imputation_techniques import impute_missing_column
+from classifiers_validation import try_classification
+from Column_profile_extraction.numerical import get_features_num
+from Column_profile_extraction.categorical import get_features_cat
 from joblib import load
-from src.Datasets.get_dataset import get_dataset
+from Datasets.get_dataset import get_dataset
 import itertools
 import warnings
 import seaborn as sns

@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import kmodes
 from sklearn import linear_model
 from kmodes.kprototypes import KPrototypes
 from kmodes.kmodes import KModes
@@ -10,7 +11,7 @@ from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from skfuzzy import cmeans, cmeans_predict
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OrdinalEncoder
-from src.utils import encoding_categorical_variables
+from utils import encoding_categorical_variables
 from sklearn.neighbors import KNeighborsClassifier
 
 

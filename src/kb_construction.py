@@ -1,23 +1,23 @@
 import numpy as np
-from src.Datasets.get_dataset import get_dataset
-from src.Feature_selection.feature_selection import feature_selection_univariate, fixed_fs_univariate, remove_corr
-from src.Column_profile_extraction.numerical import get_features_num
-from src.Column_profile_extraction.categorical import get_features_cat
-from src.Imputation.imputation_techniques import impute_missing_column
-from src.Classification.algorithms_class import classification
+from Feature_selection.feature_selection import feature_selection_univariate, fixed_fs_univariate, remove_corr
+from Column_profile_extraction.numerical import get_features_num
+from Datasets.get_dataset import get_dataset
+from Column_profile_extraction.categorical import get_features_cat
+from Imputation.imputation_techniques import impute_missing_column
+from Classification.algorithms_class import classification
 from itertools import repeat
 from multiprocessing import Pool
-from src.utils import dirty_single_column, encoding_categorical_variables
+from utils import dirty_single_column, encoding_categorical_variables
 import pandas as pd
 import warnings
 
 warnings.filterwarnings("ignore")
 
 # opening files with names of datasets, ml algorithms and imputation methods
-file_datasets = open("Datasets/dataset_names.txt", "r")
-file_ml_methods = open("Classification/classification_methods.txt", "r")
-file_imp_methods_num = open("Imputation/methods_numerical_column.txt", "r")
-file_imp_methods_cat = open("Imputation/methods_categorical_column.txt", "r")
+file_datasets = open("src/Datasets/dataset_names.txt", "r")
+file_ml_methods = open("src/Classification/classification_methods.txt", "r")
+file_imp_methods_num = open("src/Imputation/methods_numerical_column.txt", "r")
+file_imp_methods_cat = open("src/Imputation/methods_categorical_column.txt", "r")
 
 datasets = file_datasets.readlines()
 ml_methods = file_ml_methods.readlines()
@@ -30,7 +30,7 @@ imp_methods_num = [line.strip('\n\r') for line in imp_methods_num]
 imp_methods_cat = [line.strip('\n\r') for line in imp_methods_cat]
 
 # this dataframe contains the value of the parameters to train the ml algorithms
-df_hyper = pd.read_csv("Hyperparameter_tuning/hyperparameters.csv")
+df_hyper = pd.read_csv("src/Hyperparameter_tuning/hyperparameters.csv")
 
 def generate_seed(n_seed, n_elements):
     seed = []
@@ -183,7 +183,7 @@ def main(reduced_df=False):
     # datasets = ["default of credit card clients", "frogs", "mushrooms", "ringnorm"]
     for dataset in datasets:
         print("------------" + dataset + "------------")
-        df = get_dataset(path_datasets,dataset + ".csv")
+        df = get_dataset("src/" + path_datasets,dataset + ".csv")
         class_name = df.columns[-1]
 
         # feature selection

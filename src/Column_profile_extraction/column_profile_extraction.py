@@ -1,8 +1,8 @@
-from src.Datasets.get_dataset import get_dataset
-from src.Feature_selection.feature_selection import feature_selection_univariate
-from src.Column_profile_extraction.numerical import get_features_num
-from src.Column_profile_extraction.categorical import get_features_cat
-from src.utils import dirty_single_column
+from Datasets.get_dataset import get_dataset
+from Feature_selection.feature_selection import feature_selection_univariate
+from Column_profile_extraction.numerical import get_features_num
+from Column_profile_extraction.categorical import get_features_cat
+from utils import dirty_single_column
 
 
 # this file is only used to check everything works correctly

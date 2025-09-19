@@ -3,7 +3,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import SelectPercentile, SelectKBest, chi2, f_classif
 import numpy as np
 from sklearn.preprocessing import OrdinalEncoder
-from src.Datasets.get_dataset import get_dataset
+from Datasets.get_dataset import get_dataset
 
 def feature_selection_univariate(df, class_name, perc_num=50, perc_cat=50):
     """
