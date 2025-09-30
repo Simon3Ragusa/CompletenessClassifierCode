@@ -14,10 +14,10 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # opening files with names of datasets, ml algorithms and imputation methods
-file_datasets = open("src/Datasets/dataset_names.txt", "r")
-file_ml_methods = open("src/Classification/classification_methods.txt", "r")
-file_imp_methods_num = open("src/Imputation/methods_numerical_column.txt", "r")
-file_imp_methods_cat = open("src/Imputation/methods_categorical_column.txt", "r")
+file_datasets = open("Datasets/dataset_names.txt", "r")
+file_ml_methods = open("Classification/classification_methods.txt", "r")
+file_imp_methods_num = open("Imputation/methods_numerical_column.txt", "r")
+file_imp_methods_cat = open("Imputation/methods_categorical_column.txt", "r")
 
 datasets = file_datasets.readlines()
 ml_methods = file_ml_methods.readlines()
@@ -30,7 +30,7 @@ imp_methods_num = [line.strip('\n\r') for line in imp_methods_num]
 imp_methods_cat = [line.strip('\n\r') for line in imp_methods_cat]
 
 # this dataframe contains the value of the parameters to train the ml algorithms
-df_hyper = pd.read_csv("src/Hyperparameter_tuning/hyperparameters.csv")
+df_hyper = pd.read_csv("Hyperparameter_tuning/hyperparameters.csv")
 
 def generate_seed(n_seed, n_elements):
     seed = []
@@ -76,12 +76,12 @@ def procedure(df, dataset, class_name, column, seed):
         column_type = df[column].dtype
 
         imputed_datasets = []
-        #print("starting imputation ", i)
+        print("starting imputation ", i)
         if column_type in ["int64", "float64"]:
             column_profile = get_features_num(df_missing, column)
             # impute the numerical column with all the imputation methods
             for imp_method in imp_methods_num:
-                #print(imp_method)
+                print(imp_method)
                 current_df = df_missing.copy()
                 imputed_df = impute_missing_column(current_df, imp_method,
                                                    column)
@@ -93,7 +93,7 @@ def procedure(df, dataset, class_name, column, seed):
             column_profile = get_features_cat(df_missing, column)
             # impute the categorical column with all the imputation methods
             for imp_method in imp_methods_cat:
-                #print(imp_method)
+                print(imp_method)
                 current_df = df_missing.copy()
                 imputed_df = impute_missing_column(current_df, imp_method,
                                                    column)
@@ -104,7 +104,7 @@ def procedure(df, dataset, class_name, column, seed):
         ml_results = dict()
         # for each ml algorithm and imputed dataset, compute the corresponding score
         for ml_method in ml_methods:
-            #print("starting ", ml_method)
+            print("starting ", ml_method)
             scores = []
             for imputed_df in imputed_datasets:
                 new_features = list(imputed_df.columns)
@@ -183,7 +183,7 @@ def main(reduced_df=False):
     # datasets = ["default of credit card clients", "frogs", "mushrooms", "ringnorm"]
     for dataset in datasets:
         print("------------" + dataset + "------------")
-        df = get_dataset("src/" + path_datasets,dataset + ".csv")
+        df = get_dataset(path_datasets,dataset + ".csv")
         class_name = df.columns[-1]
 
         # feature selection
