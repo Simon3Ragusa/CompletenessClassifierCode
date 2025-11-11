@@ -19,6 +19,7 @@ from sklearn.neighbors import KNeighborsClassifier
 # ===================================================================
 from hyperimpute.plugins.imputers import Imputers
 from fancyimpute import SoftImpute
+from xgbimputer import XGBImputer
 
 
 class no_impute:
@@ -398,13 +399,17 @@ class impute_soft_impute():
         df = pd.DataFrame(SoftImpute(verbose=False).fit_transform(df))
         return df
 
+# Works with both types of features
 class impute_xgb_imputer():
     def __init__(self):
-        self.name = 'XGBoost Impute'
+        self.name = 'XGB Imputer'
 
-    def fit(self, df):
-        pass
-
+    def fit(self, df, categorical_features_index, replace_values_back=True):
+        imputer = XGBImputer(categorical_features_index=categorical_features_index, replace_categorical_values_back=replace_values_back)
+        df = np.array(df)
+        # print("We are inside the class. Input shape: ", df.shape)
+        df = pd.DataFrame(imputer.fit_transform(df))
+        return df
 class impute_catboost():
     def __init__(self):
         self.name = 'CatBoost Impute'

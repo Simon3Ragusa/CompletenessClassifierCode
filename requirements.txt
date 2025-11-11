@@ -12,3 +12,5 @@ joblib~=1.1.1
 torch~=2.8.0
 hyperimpute
 fancyimpute
+xgbimputer
+catboost
