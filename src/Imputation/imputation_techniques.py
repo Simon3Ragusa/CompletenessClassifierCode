@@ -14,6 +14,12 @@ from sklearn.preprocessing import OrdinalEncoder
 from utils import encoding_categorical_variables
 from sklearn.neighbors import KNeighborsClassifier
 
+# ===================================================================
+# New Imputation methods classes
+# ===================================================================
+from hyperimpute.plugins.imputers import Imputers
+from fancyimpute import SoftImpute
+
 
 class no_impute:
     def __init__(self):
@@ -366,6 +372,90 @@ class impute_clustering():
             imputed_values = np.array([centroids_values[label] for label in labels])
             X.loc[df[missing_column].isna(), missing_column] = imputed_values
         return X
+    
+# ===================================================================
+                        # New methods #
+# ===================================================================
+
+# Just for numeric features
+class impute_expectation_maximization():
+    def __init__(self):
+        self.name = 'Expectation Maximization'
+
+    def fit(self, df):
+        plugin = Imputers().get("EM")
+        tmp = plugin.fit_transform(df)
+        return tmp
+
+# Only numerical features
+class impute_soft_impute():
+    def __init__(self):
+        self.name = 'Soft Impute'
+
+    def fit(self, df):
+        # X_incomplete_normalized = BiScaler().fit_transform(df)
+        df = np.array(df).reshape(-1,1)
+        df = pd.DataFrame(SoftImpute(verbose=False).fit_transform(df))
+        return df
+
+class impute_xgb_imputer():
+    def __init__(self):
+        self.name = 'XGBoost Impute'
+
+    def fit(self, df):
+        pass
+
+class impute_catboost():
+    def __init__(self):
+        self.name = 'CatBoost Impute'
+
+    def fit(self, df):
+        pass
+
+class impute_rfi():
+    def __init__(self):
+        self.name = 'RFI Impute'
+
+    def fit(self, df):
+        pass
+
+class impute_autoimpute():
+    def __init__(self):
+        self.name = 'Autoimpute'
+
+    def fit(self, df):
+        pass
+
+class impute_multiple_soft_impute():
+    def __init__(self):
+        self.name = 'Multiple Soft Impute'
+
+    def fit(self, df):
+        pass
+
+class impute_gain():
+    def __init__(self):
+        self.name = 'GAIN Impute'
+
+    def fit(self, df):
+        pass
+
+
+class impute_vae():
+    def __init__(self):
+        self.name = 'VAE Impute'
+
+    def fit(self, df):
+        pass
+
+class impute_mlp():
+    def __init__(self):
+        self.name = 'MLP Impute'
+
+    def fit(self, df):
+        pass
+
+# ===================================================================
 
 def impute_missing_column(df, method, missing_column):
     np.random.seed(0)
@@ -412,4 +502,10 @@ def impute_missing_column(df, method, missing_column):
     elif method == "impute_kproto":
         imputator = impute_clustering()
         imputated_df = imputator.fit_cat(df, missing_column)
+
+    '''
+    ADD OTHER IMPUTATION METHODS HERE
+    '''
     return imputated_df
+
+
