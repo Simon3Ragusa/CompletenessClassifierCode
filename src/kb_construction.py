@@ -32,6 +32,8 @@ imp_methods_cat = [line.strip('\n\r') for line in imp_methods_cat]
 # this dataframe contains the value of the parameters to train the ml algorithms
 df_hyper = pd.read_csv("Hyperparameter_tuning/hyperparameters.csv")
 
+
+# generate seeds for the different parallel jobs
 def generate_seed(n_seed, n_elements):
     seed = []
     seeds = []
@@ -42,7 +44,7 @@ def generate_seed(n_seed, n_elements):
         seed = []
     return seeds
 
-
+# execute the experiments in parallel
 def parallel_exec(df, dataset, class_name, column, n_parallel_jobs, n_instances_tot, file_seeds):
     n_instances_x_job = int(n_instances_tot / n_parallel_jobs)
     seed = generate_seed(n_parallel_jobs, n_instances_x_job)
@@ -55,6 +57,7 @@ def parallel_exec(df, dataset, class_name, column, n_parallel_jobs, n_instances_
     new_line_seeds = new_line_seeds[:-1] + "\n"
     file_seeds.write(new_line_seeds)
 
+    # create the iterator for the parallel execution
     itr = zip(repeat(df), repeat(dataset), repeat(class_name), repeat(column), seed)
 
     # starts the parallel experiments on the column
@@ -63,14 +66,17 @@ def parallel_exec(df, dataset, class_name, column, n_parallel_jobs, n_instances_
         return results
 
 
+# procedure for the experiments on a specific column
 def procedure(df, dataset, class_name, column, seed):
     features = list(df.columns)
     features.remove(class_name)
 
-    # inject missing values in the df, with different percentages
+    # inject missing values in the df, with different percentages. This data frame contains different versions of the column with missing values (different percentages)
     df_list_no_class = dirty_single_column(df[features], column, class_name, seed)
 
+    # Initialize the results dictionary
     results_experiment = dict()
+
     column_profile = ()
     for i, df_missing in enumerate(df_list_no_class):
         column_type = df[column].dtype
@@ -78,7 +84,10 @@ def procedure(df, dataset, class_name, column, seed):
         imputed_datasets = []
         print("starting imputation ", i)
         if column_type in ["int64", "float64"]:
+
+            # Profile extraction for numerical column with missing values
             column_profile = get_features_num(df_missing, column)
+
             # impute the numerical column with all the imputation methods
             for imp_method in imp_methods_num:
                 print(imp_method)
@@ -86,6 +95,8 @@ def procedure(df, dataset, class_name, column, seed):
                 imputed_df = impute_missing_column(current_df, imp_method,
                                                    column)
                 imputed_df = encoding_categorical_variables(imputed_df)
+
+                # add the class column back to the imputed dataframe
                 imputed_df[class_name] = df[class_name]
                 imputed_datasets.append(imputed_df)
 
@@ -98,10 +109,13 @@ def procedure(df, dataset, class_name, column, seed):
                 imputed_df = impute_missing_column(current_df, imp_method,
                                                    column)
                 imputed_df = encoding_categorical_variables(imputed_df)
+
+                # add the class column back to the imputed dataframe
                 imputed_df[class_name] = df[class_name]
                 imputed_datasets.append(imputed_df)
 
         ml_results = dict()
+        
         # for each ml algorithm and imputed dataset, compute the corresponding score
         for ml_method in ml_methods:
             print("starting ", ml_method)
