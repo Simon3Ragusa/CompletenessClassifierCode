@@ -76,12 +76,12 @@ def procedure(df, dataset, class_name, column, seed):
         column_type = df[column].dtype
 
         imputed_datasets = []
-        #print("starting imputation ", i)
+        print("starting imputation ", i)
         if column_type in ["int64", "float64"]:
             column_profile = get_features_num(df_missing, column)
             # impute the numerical column with all the imputation methods
             for imp_method in imp_methods_num:
-                #print(imp_method)
+                print(imp_method)
                 current_df = df_missing.copy()
                 imputed_df = impute_missing_column(current_df, imp_method,
                                                    column)
@@ -93,7 +93,7 @@ def procedure(df, dataset, class_name, column, seed):
             column_profile = get_features_cat(df_missing, column)
             # impute the categorical column with all the imputation methods
             for imp_method in imp_methods_cat:
-                #print(imp_method)
+                print(imp_method)
                 current_df = df_missing.copy()
                 imputed_df = impute_missing_column(current_df, imp_method,
                                                    column)
