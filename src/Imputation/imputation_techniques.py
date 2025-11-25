@@ -22,6 +22,8 @@ from hyperimpute.plugins.imputers import Imputers
 from fancyimpute import SoftImpute
 from xgbimputer import XGBImputer
 from catboost import CatBoostRegressor, CatBoostClassifier
+from autoimpute.imputations import MiceImputer
+import miceforest as mf
 
 
 class no_impute:
