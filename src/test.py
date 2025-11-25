@@ -1,6 +1,15 @@
 import os
+from sklearn.compose import ColumnTransformer
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.discriminant_analysis import StandardScaler
+from sklearn.neural_network import MLPClassifier, MLPRegressor
+from sklearn.pipeline import Pipeline
 import torch
 from hyperimpute.plugins.imputers import Imputers
+
+from sklearn.experimental import enable_iterative_imputer
+from sklearn.impute import KNNImputer, IterativeImputer
 
 from fancyimpute import KNN, NuclearNormMinimization, SoftImpute, BiScaler
 
@@ -154,7 +163,7 @@ class impute_rfi():
         categorical_features_index = [df.columns.get_loc(col) for col in categorical_features]
         
         for col in df.select_dtypes(include=["object" ,"bool"]).columns:
-            df_missing[col] = df_missing[col].astype('category')
+            df[col] = df[col].astype('category')
         
         kernel = mf.ImputationKernel(
             data=df,
@@ -287,6 +296,141 @@ class impute_vae():
                     df.loc[index, selected_col] = 1
             return df
         
+class impute_mlp():
+    def __init__(self):
+        self.name = 'MLP Impute'
+
+    def fit(self, df, missing_column):
+        X = df.copy()
+
+        numerical_cols = X.select_dtypes(include=np.number).columns.tolist()
+        categorical_cols = X.select_dtypes(include=['object', 'bool']).columns.tolist()
+
+        # Scale numerical data without pipeline
+        # scaler = StandardScaler()
+        # X[numerical_cols] = scaler.fit_transform(X[numerical_cols])
+
+        # Pipeline for Categorical Data (One-Hot Encoding)
+        # Note: Initial NaN handling is done by IterativeImputer, but OHE must be applied first.
+        # categorical_cols = encoding_categorical_variables(X[categorical_cols])
+        # X[categorical_cols.columns] = categorical_cols
+
+        # if missing column is numerical
+        if df[missing_column].dtype in ["int64", "float64"]:
+            mlp_estimator = MLPRegressor(
+                random_state=42, 
+                solver='adam', 
+                max_iter=100, 
+                hidden_layer_sizes=(100, 50), # Example architecture
+                early_stopping=True
+            )
+
+            imputer = IterativeImputer(
+                estimator=mlp_estimator,
+                initial_strategy='mean',
+                max_iter=10,
+                random_state=42
+            )
+
+            X_imputed = imputer.fit_transform(X)
+            df = pd.DataFrame(X_imputed, columns=X.columns)
+            return df
+        else:
+            mlp_estimator = MLPClassifier(
+                random_state=42, 
+                solver='adam', 
+                max_iter=100, 
+                hidden_layer_sizes=(100, 50), # Example architecture
+                early_stopping=True
+            )
+
+            imputer = IterativeImputer(
+                estimator=mlp_estimator,
+                initial_strategy='most_frequent',
+                max_iter=10,
+                random_state=42
+            )
+
+            X = encoding_categorical_variables(X)
+            print("Data after encoding: ", X.head())
+            X_imputed = imputer.fit_transform(X)
+            df = pd.DataFrame(X_imputed, columns=X.columns)
+            return df
+
+
+class impute_mlp_manual():
+    def __init__(self):
+        self.name = 'MLP Impute Manual'
+
+    def fit(self, df: pd.DataFrame, missing_column) -> pd.DataFrame:
+        X = df.copy()
+
+        # if missing column is numerical
+        if df[missing_column].dtype in ["int64", "float64"]:
+
+            X = encoding_categorical_variables(X)
+
+            mlp_estimator = MLPRegressor(
+                random_state=42, 
+                solver='adam', 
+                max_iter=100, 
+                hidden_layer_sizes=(100, 50), # Example architecture
+                early_stopping=True
+            )
+
+            # Split the data into training and prediction sets
+            train_data = X[X[missing_column].notnull()]
+            predict_data = X[X[missing_column].isnull()]
+
+            if len(predict_data) == 0:
+                return df
+
+            X_train = train_data.drop(columns=[missing_column])
+            y_train = train_data[missing_column]
+
+            X_predict = predict_data.drop(columns=[missing_column])
+
+            # Fit the model and predict missing values
+            mlp_estimator.fit(X_train, y_train)
+            predicted_values = mlp_estimator.predict(X_predict)
+
+            # Fill in the missing values
+            df.loc[df[missing_column].isnull(), missing_column] = predicted_values
+
+            return df
+        
+        else:
+
+            mlp_estimator = MLPClassifier(
+                random_state=42, 
+                solver='adam', 
+                max_iter=100, 
+                hidden_layer_sizes=(100, 50), # Example architecture
+                early_stopping=True
+            )
+
+            # Split the data into training and prediction sets
+            train_data = X[X[missing_column].notnull()]
+            predict_data = X[X[missing_column].isnull()]
+
+            if len(predict_data) == 0:
+                return df
+
+            X_train = train_data.drop(columns=[missing_column])
+            y_train = train_data[missing_column]
+
+            X_predict = predict_data.drop(columns=[missing_column])
+
+            # Fit the model and predict missing values
+            mlp_estimator.fit(X_train, y_train)
+            predicted_values = mlp_estimator.predict(X_predict)
+
+            # Fill in the missing values
+            df.loc[df[missing_column].isnull(), missing_column] = predicted_values
+
+            return df
+        
+        
 def main():
     path_datasets = "Datasets/CSV/"
     dataset = "abalone"
@@ -333,6 +477,7 @@ def main():
 
     imputer_gain = impute_gain()
     imputer_vae = impute_vae()
+    imputer_mlp = impute_mlp_manual()
     # Here we simulate an iteration on a list of datasets with missing values in the selected column, and we impute them one by one with
     # different techniques
 
@@ -343,22 +488,22 @@ def main():
 
         print("Column type: ", column_type)
         if column_type in ["int64", "float64"]:
-            print("Imputation with vae imputer - Missing percentage: ", round(df_list_no_class[i][column_to_inject_missing].isnull().sum()/df_list_no_class[i].shape[0],2))
+            print("Imputation with mlp imputer - Missing percentage: ", round(df_list_no_class[i][column_to_inject_missing].isnull().sum()/df_list_no_class[i].shape[0],2))
             df_missing = df_list_no_class[i]
             # df_missing[class_name] = df[class_name]
-            df_imputed_vae = imputer_vae.fit(df_missing, column_to_inject_missing)
+            df_imputed_mlp = imputer_mlp.fit(df_missing, column_to_inject_missing)
             # Check if there are still missing values
-            # print("Missing values after imputation: ", df_imputed_vae[column_to_inject_missing].isnull().sum())
-            print("Imputed: ", df_imputed_vae.head())
+            # print("Missing values after imputation: ", df_imputed_mlp[column_to_inject_missing].isnull().sum())
+            print("Imputed: ", df_imputed_mlp.head())
             print("\n")
         if column_type in ["object", "bool"]:
-            print("Imputation with vae imputer - Missing percentage: ", round(df_list_no_class[i][column_to_inject_missing].isnull().sum()/df_list_no_class[i].shape[0],2))
+            print("Imputation with mlp imputer - Missing percentage: ", round(df_list_no_class[i][column_to_inject_missing].isnull().sum()/df_list_no_class[i].shape[0],2))
             df_missing = df_list_no_class[i]
             # df_missing[class_name] = df[class_name]
-            df_imputed_vae = imputer_vae.fit(df_missing, column_to_inject_missing)
+            df_imputed_mlp = imputer_mlp.fit(df_missing, column_to_inject_missing)
             # Check if there are still missing values
-            #print("Missing values after imputation: ", df_imputed_vae[column_to_inject_missing].isnull().sum())
-            print("Imputed: ", df_imputed_vae.head())
+            #print("Missing values after imputation: ", df_imputed_mlp[column_to_inject_missing].isnull().sum())
+            print("Imputed: ", df_imputed_mlp.head())
             print("\n")
 
 

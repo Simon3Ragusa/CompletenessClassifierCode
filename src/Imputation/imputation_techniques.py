@@ -9,6 +9,7 @@ from sklearn.impute import KNNImputer, IterativeImputer
 from sklearn.linear_model import BayesianRidge
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from skfuzzy import cmeans, cmeans_predict
+from sklearn.neural_network import MLPClassifier, MLPRegressor
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OrdinalEncoder
 from utils import encoding_categorical_variables, restore_nans
@@ -505,7 +506,7 @@ class impute_rfi():
         categorical_features_index = [df.columns.get_loc(col) for col in categorical_features]
         
         for col in df.select_dtypes(include=["object" ,"bool"]).columns:
-            df_missing[col] = df_missing[col].astype('category')
+            df[col] = df[col].astype('category')
         
         kernel = mf.ImputationKernel(
             data=df,
@@ -555,34 +556,36 @@ class impute_gain():
             df.columns = columns
 
             return df
-        else:
-            df = encoding_categorical_variables(df)
-            df = restore_nans(df)
-            df = df.astype(float)
-            columns = list(df.columns)
-            print("Data types after encoding: ", df.head())
-            df = plugin.fit_transform(df)
-            df = pd.DataFrame(df)
-            df.columns = columns
+        
+        # Deprecated else branch
+        # else:
+        #     df = encoding_categorical_variables(df)
+        #     df = restore_nans(df)
+        #     df = df.astype(float)
+        #     columns = list(df.columns)
+        #     print("Data types after encoding: ", df.head())
+        #     df = plugin.fit_transform(df)
+        #     df = pd.DataFrame(df)
+        #     df.columns = columns
 
-            # Take the max of the "probabilities" to decide the final category, given the one hot encoding of the missing categorical variable
-            col_prefix = missing_column + "_"
-            targets = df.columns[df.columns.str.startswith(col_prefix)]
-            print("Targets: ", targets)
-            for index in df.index:
-                max_value = -1
-                selected_col = None
-                for col in targets:
-                    if df.loc[index, col] > max_value:
-                        max_value = df.loc[index, col]
-                        selected_col = col
-                # Set all target columns to 0
-                for col in targets:
-                    df.loc[index, col] = 0
-                # Set the selected column to 1
-                if selected_col is not None:
-                    df.loc[index, selected_col] = 1
-            return df
+        #     # Take the max of the "probabilities" to decide the final category, given the one hot encoding of the missing categorical variable
+        #     col_prefix = missing_column + "_"
+        #     targets = df.columns[df.columns.str.startswith(col_prefix)]
+        #     print("Targets: ", targets)
+        #     for index in df.index:
+        #         max_value = -1
+        #         selected_col = None
+        #         for col in targets:
+        #             if df.loc[index, col] > max_value:
+        #                 max_value = df.loc[index, col]
+        #                 selected_col = col
+        #         # Set all target columns to 0
+        #         for col in targets:
+        #             df.loc[index, col] = 0
+        #         # Set the selected column to 1
+        #         if selected_col is not None:
+        #             df.loc[index, selected_col] = 1
+        #     return df
         
 class impute_vae():
     def __init__(self):
@@ -609,41 +612,109 @@ class impute_vae():
             df.columns = columns
 
             return df
-        else:
-            df = encoding_categorical_variables(df)
-            df = restore_nans(df)
-            df = df.astype(float)
-            columns = list(df.columns)
-            print("Data types after encoding: ", df.head())
-            df = plugin.fit_transform(df)
-            df = pd.DataFrame(df)
-            df.columns = columns
+        
+        # Deprecated else branch
+        # else:
+        #     df = encoding_categorical_variables(df)
+        #     df = restore_nans(df)
+        #     df = df.astype(float)
+        #     columns = list(df.columns)
+        #     print("Data types after encoding: ", df.head())
+        #     df = plugin.fit_transform(df)
+        #     df = pd.DataFrame(df)
+        #     df.columns = columns
 
-            # Take the max of the "probabilities" to decide the final category, given the one hot encoding of the missing categorical variable
-            col_prefix = missing_column + "_"
-            targets = df.columns[df.columns.str.startswith(col_prefix)]
-            print("Targets: ", targets)
-            for index in df.index:
-                max_value = -1
-                selected_col = None
-                for col in targets:
-                    if df.loc[index, col] > max_value:
-                        max_value = df.loc[index, col]
-                        selected_col = col
-                # Set all target columns to 0
-                for col in targets:
-                    df.loc[index, col] = 0
-                # Set the selected column to 1
-                if selected_col is not None:
-                    df.loc[index, selected_col] = 1
-            return df
+        #     # Take the max of the "probabilities" to decide the final category, given the one hot encoding of the missing categorical variable
+        #     col_prefix = missing_column + "_"
+        #     targets = df.columns[df.columns.str.startswith(col_prefix)]
+        #     print("Targets: ", targets)
+        #     for index in df.index:
+        #         max_value = -1
+        #         selected_col = None
+        #         for col in targets:
+        #             if df.loc[index, col] > max_value:
+        #                 max_value = df.loc[index, col]
+        #                 selected_col = col
+        #         # Set all target columns to 0
+        #         for col in targets:
+        #             df.loc[index, col] = 0
+        #         # Set the selected column to 1
+        #         if selected_col is not None:
+        #             df.loc[index, selected_col] = 1
+        #     return df
 
+# Both
 class impute_mlp():
     def __init__(self):
-        self.name = 'MLP Impute'
+        self.name = 'MLP Imputer'
 
-    def fit(self, df):
-        pass
+    def fit(self, df: pd.DataFrame, missing_column) -> pd.DataFrame:
+        X = df.copy()
+
+        # if missing column is numerical
+        if df[missing_column].dtype in ["int64", "float64"]:
+
+            X = encoding_categorical_variables(X)
+
+            mlp_estimator = MLPRegressor(
+                random_state=42, 
+                solver='adam', 
+                max_iter=100, 
+                hidden_layer_sizes=(100, 50), # Example architecture
+                early_stopping=True
+            )
+
+            # Split the data into training and prediction sets
+            train_data = X[X[missing_column].notnull()]
+            predict_data = X[X[missing_column].isnull()]
+
+            if len(predict_data) == 0:
+                return df
+
+            X_train = train_data.drop(columns=[missing_column])
+            y_train = train_data[missing_column]
+
+            X_predict = predict_data.drop(columns=[missing_column])
+
+            # Fit the model and predict missing values
+            mlp_estimator.fit(X_train, y_train)
+            predicted_values = mlp_estimator.predict(X_predict)
+
+            # Fill in the missing values
+            df.loc[df[missing_column].isnull(), missing_column] = predicted_values
+
+            return df
+        
+        else:
+
+            mlp_estimator = MLPClassifier(
+                random_state=42, 
+                solver='adam', 
+                max_iter=100, 
+                hidden_layer_sizes=(100, 50), # Example architecture
+                early_stopping=True
+            )
+
+            # Split the data into training and prediction sets
+            train_data = X[X[missing_column].notnull()]
+            predict_data = X[X[missing_column].isnull()]
+
+            if len(predict_data) == 0:
+                return df
+
+            X_train = train_data.drop(columns=[missing_column])
+            y_train = train_data[missing_column]
+
+            X_predict = predict_data.drop(columns=[missing_column])
+
+            # Fit the model and predict missing values
+            mlp_estimator.fit(X_train, y_train)
+            predicted_values = mlp_estimator.predict(X_predict)
+
+            # Fill in the missing values
+            df.loc[df[missing_column].isnull(), missing_column] = predicted_values
+
+            return df
 
 # ===================================================================
 
@@ -692,10 +763,38 @@ def impute_missing_column(df, method, missing_column):
     elif method == "impute_kproto":
         imputator = impute_clustering()
         imputated_df = imputator.fit_cat(df, missing_column)
-
-    '''
-    ADD OTHER IMPUTATION METHODS HERE
-    '''
+    # ===================================================================
+    elif method == "impute_expectation_maximization":
+        imputator = impute_expectation_maximization()
+        imputated_df = imputator.fit(df)
+    elif method == "impute_soft_impute":
+        imputator = impute_soft_impute()
+        imputated_df = imputator.fit(df)
+    elif method == "impute_xgb_imputer":
+        imputator = impute_xgb_imputer()
+        categorical_features = list(df.select_dtypes(include=["object", "bool"]).columns)
+        categorical_features_index = [df.columns.get_loc(col) for col in categorical_features]
+        imputated_df = imputator.fit(df, categorical_features_index)
+    elif method == "impute_catboost":
+        imputator = impute_catboost()
+        imputated_df = imputator.fit(df, missing_column)
+    elif method == "impute_rfi":
+        imputator = impute_rfi()
+        imputated_df = imputator.fit(df, missing_column)
+    elif method == "impute_autoimpute":
+        imputator = impute_autoimpute()
+        imputated_df = imputator.fit(df)
+    elif method == "impute_gain":
+        imputator = impute_gain()
+        imputated_df = imputator.fit(df, missing_column)
+    elif method == "impute_vae":
+        imputator = impute_vae()
+        imputated_df = imputator.fit(df, missing_column)
+    elif method == "impute_mlp":
+        imputator = impute_mlp()
+        imputated_df = imputator.fit(df, missing_column)
     return imputated_df
+
+    
 
 
