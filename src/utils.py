@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import re
 
 def encoding_categorical_variables(X):
     """
@@ -20,6 +21,23 @@ def encoding_categorical_variables(X):
         if col in categorical_columns:
             X = encode(X,col)
     return X
+
+def restore_nans(df):
+    nan_df = df.loc[:, df.columns.str.endswith("_nan")]
+
+    pattern = "^([^_]*)_"
+    regex = re.compile(pattern)
+
+    for index in df.index:
+        for col_nan in nan_df.columns:
+            if df.loc[index,col_nan] == 1:
+                col_id = regex.search(col_nan).group(1)
+                targets = df.columns[df.columns.str.startswith(col_id+'_')]
+                df.loc[index, targets] = np.nan
+    
+    df.drop(df.columns[df.columns.str.endswith('_nan')], axis=1, inplace=True)
+
+    return df
 
 def check_datatypes(df):
     for col in df.columns:

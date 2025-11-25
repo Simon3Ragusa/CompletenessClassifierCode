@@ -10,3 +10,6 @@ impute_cmeans
 impute_expectation_maximization
 impute_soft_imputer
 impute_xgb_imputer
+impute_catboost
+impute_rfi
+impute_autoimpute

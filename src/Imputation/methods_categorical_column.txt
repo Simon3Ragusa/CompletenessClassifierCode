@@ -7,3 +7,6 @@ impute_logistic_regression
 impute_random_forest
 impute_kproto
 impute_xgb_imputer
+impute_catboost
+impute_rfi
+impute_autoimpute

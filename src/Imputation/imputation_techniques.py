@@ -11,7 +11,7 @@ from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from skfuzzy import cmeans, cmeans_predict
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OrdinalEncoder
-from utils import encoding_categorical_variables
+from utils import encoding_categorical_variables, restore_nans
 from sklearn.neighbors import KNeighborsClassifier
 
 # ===================================================================
@@ -20,6 +20,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from hyperimpute.plugins.imputers import Imputers
 from fancyimpute import SoftImpute
 from xgbimputer import XGBImputer
+from catboost import CatBoostRegressor, CatBoostClassifier
 
 
 class no_impute:
@@ -410,48 +411,232 @@ class impute_xgb_imputer():
         # print("We are inside the class. Input shape: ", df.shape)
         df = pd.DataFrame(imputer.fit_transform(df))
         return df
+
 class impute_catboost():
     def __init__(self):
-        self.name = 'CatBoost Impute'
+        self.name = 'CatBoost Imputer'
 
-    def fit(self, df):
-        pass
+    def fit(self, df, missing_column):
 
+        type_missing = df.dtypes[missing_column]
+        #missing_column = df[missing_column]
+        print("Type missing: ", type_missing)
+        X = df.copy()
+
+        # Select categorical features from the dataset
+        cat_features = list(df.select_dtypes(include=["object", "bool"]).columns)
+
+        if type_missing in ["int64", "float64"]:
+            # Use CatBoostRegressor
+            fully_available_samples = X[X[missing_column].notnull()]
+            missing = X[X[missing_column].isnull()]
+
+            X_train = fully_available_samples.drop(columns = [missing_column])
+            print("X_train type: ", type(X_train))
+            print("X_train shape: ", X_train.shape)
+            y_train = fully_available_samples[missing_column]
+
+            X_pred = missing.drop(columns = [missing_column])
+
+            # Up to here we have the training set in X_train and y_train and the uncomplete samples in X_pred
+
+            imputer = CatBoostRegressor(
+                iterations=200,
+                depth=6,
+                learning_rate=0.05,
+                loss_function='RMSE',
+                verbose=False,
+                random_seed=42
+            )
+
+            if len(fully_available_samples) > 1 and len(missing) > 0:
+                imputer.fit(X_train, y_train, cat_features=cat_features)
+                print(type(df))
+                df.loc[df[missing_column].isnull(), missing_column] = imputer.predict(X_pred)
+                df = pd.DataFrame(df)
+                return df
+            
+            df = pd.DataFrame(columns=df.columns)
+            return df
+            
+        elif type_missing in ["bool", "object"]:
+            cat_features = [feat for feat in cat_features if feat != missing_column]
+            # Use CatBoostClassifier
+            fully_available_samples = X[X[missing_column].notnull()]
+            missing = X[X[missing_column].isnull()]
+
+            # # encode categorical variables
+            # fully_available_samples = encoding_categorical_variables(fully_available_samples)
+            # print("Fully available samples after encoding: ", fully_available_samples.head())
+
+            # missing = encoding_categorical_variables(missing)
+
+            X_train = fully_available_samples.drop(columns = [missing_column])
+            y_train = fully_available_samples[missing_column]
+
+            X_pred = missing.drop(columns = [missing_column])
+
+            imputer = CatBoostClassifier(
+                iterations=200,
+                depth=6,
+                learning_rate=0.05,
+                loss_function='MultiClass',
+                verbose=False,
+                random_seed=42
+            )
+
+            if len(fully_available_samples) > 1 and len(missing) > 0:
+                imputer.fit(X_train, y_train, cat_features=cat_features)
+                df.loc[df[missing_column].isnull(), missing_column] = imputer.predict(X_pred)
+                df = pd.DataFrame(df)
+                return df
+
+            print("Debug")
+            return 0
+
+# Both kind of features
 class impute_rfi():
     def __init__(self):
-        self.name = 'RFI Impute'
+        self.name = 'Random Forest Imputer'
 
-    def fit(self, df):
-        pass
+    def fit(self, df, missing_column):
+        # Get categorical features index
+        categorical_features = list(df.select_dtypes(include=["object", "bool"]).columns)
+        categorical_features_index = [df.columns.get_loc(col) for col in categorical_features]
+        
+        for col in df.select_dtypes(include=["object" ,"bool"]).columns:
+            df_missing[col] = df_missing[col].astype('category')
+        
+        kernel = mf.ImputationKernel(
+            data=df,
+            save_all_iterations_data=True,
+            random_state=42
+        )
 
+        kernel.mice(3)
+
+        df = kernel.complete_data()
+        return df
+
+# To test
 class impute_autoimpute():
     def __init__(self):
         self.name = 'Autoimpute'
 
     def fit(self, df):
-        pass
+        mice = MiceImputer(return_list=True)
+        mice = mice.fit(df)
+        df = pd.DataFrame(mice.transform(df))
+        return df
 
-class impute_multiple_soft_impute():
-    def __init__(self):
-        self.name = 'Multiple Soft Impute'
-
-    def fit(self, df):
-        pass
-
+# Both GAIN and VAE work with both types of features
 class impute_gain():
     def __init__(self):
         self.name = 'GAIN Impute'
 
-    def fit(self, df):
-        pass
+    def fit(self, df, missing_column):
+        plugin = Imputers().get("gain")
 
+        if df[missing_column].dtype in ["int64", "float64"]:
+            # encode categorical variables
+            X = df.copy()
+            target = X[missing_column]
+            X = X.drop(columns=[missing_column])
+            X = encoding_categorical_variables(X)
+            X[missing_column] = target
+            X = X.astype(float)
 
+            columns = list(X.columns)
+
+            df = plugin.fit_transform(X)
+            df = pd.DataFrame(df)
+
+            # maps back the original columns
+            df.columns = columns
+
+            return df
+        else:
+            df = encoding_categorical_variables(df)
+            df = restore_nans(df)
+            df = df.astype(float)
+            columns = list(df.columns)
+            print("Data types after encoding: ", df.head())
+            df = plugin.fit_transform(df)
+            df = pd.DataFrame(df)
+            df.columns = columns
+
+            # Take the max of the "probabilities" to decide the final category, given the one hot encoding of the missing categorical variable
+            col_prefix = missing_column + "_"
+            targets = df.columns[df.columns.str.startswith(col_prefix)]
+            print("Targets: ", targets)
+            for index in df.index:
+                max_value = -1
+                selected_col = None
+                for col in targets:
+                    if df.loc[index, col] > max_value:
+                        max_value = df.loc[index, col]
+                        selected_col = col
+                # Set all target columns to 0
+                for col in targets:
+                    df.loc[index, col] = 0
+                # Set the selected column to 1
+                if selected_col is not None:
+                    df.loc[index, selected_col] = 1
+            return df
+        
 class impute_vae():
     def __init__(self):
         self.name = 'VAE Impute'
 
-    def fit(self, df):
-        pass
+    def fit(self, df, missing_column):
+        plugin = Imputers().get("miwae")
+
+        if df[missing_column].dtype in ["int64", "float64"]:
+            # encode categorical variables
+            X = df.copy()
+            target = X[missing_column]
+            X = X.drop(columns=[missing_column])
+            X = encoding_categorical_variables(X)
+            X[missing_column] = target
+            X = X.astype(float)
+
+            columns = list(X.columns)
+
+            df = plugin.fit_transform(X)
+            df = pd.DataFrame(df)
+
+            # maps back the original columns
+            df.columns = columns
+
+            return df
+        else:
+            df = encoding_categorical_variables(df)
+            df = restore_nans(df)
+            df = df.astype(float)
+            columns = list(df.columns)
+            print("Data types after encoding: ", df.head())
+            df = plugin.fit_transform(df)
+            df = pd.DataFrame(df)
+            df.columns = columns
+
+            # Take the max of the "probabilities" to decide the final category, given the one hot encoding of the missing categorical variable
+            col_prefix = missing_column + "_"
+            targets = df.columns[df.columns.str.startswith(col_prefix)]
+            print("Targets: ", targets)
+            for index in df.index:
+                max_value = -1
+                selected_col = None
+                for col in targets:
+                    if df.loc[index, col] > max_value:
+                        max_value = df.loc[index, col]
+                        selected_col = col
+                # Set all target columns to 0
+                for col in targets:
+                    df.loc[index, col] = 0
+                # Set the selected column to 1
+                if selected_col is not None:
+                    df.loc[index, selected_col] = 1
+            return df
 
 class impute_mlp():
     def __init__(self):
