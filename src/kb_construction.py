@@ -243,8 +243,6 @@ def main(reduced_df=False):
         columns = list(df_fs.columns)
         columns.remove(class_name)
         print("Columns selected after removing correlated features: ", columns)
-        columns.remove("'Length'")
-        print("Columns selected after feature selection: ", columns)
         for column in columns:
             print("ANALYZING ", column)
             if not reduced_df:
