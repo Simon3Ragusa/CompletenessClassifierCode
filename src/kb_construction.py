@@ -185,8 +185,8 @@ def main(reduced_df=False):
     path_datasets = "Datasets/CSV/"
     new_exp_path = "NewExp/"
     # sempre multipli
-    n_instances_tot = 1
-    n_parallel_jobs = 1
+    n_instances_tot = 8
+    n_parallel_jobs = 8
 
     # Opening file to save the results (in the new experiments folder)
     files_numerical = []
