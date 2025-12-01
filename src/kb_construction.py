@@ -10,14 +10,20 @@ from multiprocessing import Pool
 from utils import dirty_single_column, encoding_categorical_variables
 import pandas as pd
 import warnings
-
 warnings.filterwarnings("ignore")
+# set PyTensor flags cxx to an empty string.
+import os
+os.environ["PYTENSOR_FLAGS"] = "cxx="
 
 # opening files with names of datasets, ml algorithms and imputation methods
 file_datasets = open("Datasets/dataset_names.txt", "r")
 file_ml_methods = open("Classification/classification_methods.txt", "r")
-file_imp_methods_num = open("Imputation/methods_numerical_column.txt", "r")
-file_imp_methods_cat = open("Imputation/methods_categorical_column.txt", "r")
+
+## =========== NEW EXPERIMENTS WITH NEW IMPUTATION METHODS ============== ##
+# file_imp_methods_num = open("Imputation/methods_numerical_column.txt", "r")
+# file_imp_methods_cat = open("Imputation/methods_categorical_column.txt", "r")
+file_imp_methods_num = open("Imputation/new_methods_numerical_column.txt", "r")
+file_imp_methods_cat = open("Imputation/new_methods_categorical_column.txt", "r")
 
 datasets = file_datasets.readlines()
 ml_methods = file_ml_methods.readlines()
@@ -82,7 +88,7 @@ def procedure(df, dataset, class_name, column, seed):
         column_type = df[column].dtype
 
         imputed_datasets = []
-        print("starting imputation ", i)
+        # print("Starting imputation on first dirty dataset ", i)
         if column_type in ["int64", "float64"]:
 
             # Profile extraction for numerical column with missing values
@@ -90,37 +96,50 @@ def procedure(df, dataset, class_name, column, seed):
 
             # impute the numerical column with all the imputation methods
             for imp_method in imp_methods_num:
-                print(imp_method)
+                #print("[", imp_method, "]")
                 current_df = df_missing.copy()
                 imputed_df = impute_missing_column(current_df, imp_method,
                                                    column)
                 imputed_df = encoding_categorical_variables(imputed_df)
-
                 # add the class column back to the imputed dataframe
                 imputed_df[class_name] = df[class_name]
                 imputed_datasets.append(imputed_df)
+                # print("Imputation with method ", imp_method, " completed.")
+                # print("Imputed dataset shape: ", imputed_df.shape)
+                # print("Inputed dataset columns: ", imputed_df.columns)
+                # print("")
 
         if column_type in ["bool", "object"]:
             column_profile = get_features_cat(df_missing, column)
             # impute the categorical column with all the imputation methods
             for imp_method in imp_methods_cat:
-                print(imp_method)
+                # print("[", imp_method, "]")
                 current_df = df_missing.copy()
                 imputed_df = impute_missing_column(current_df, imp_method,
                                                    column)
+                # print("Imputed dataset shape: ", imputed_df.shape)
+                # print("Inputed column unique values: ", imputed_df[column].unique())
                 imputed_df = encoding_categorical_variables(imputed_df)
 
                 # add the class column back to the imputed dataframe
                 imputed_df[class_name] = df[class_name]
                 imputed_datasets.append(imputed_df)
+                # print("Imputation with method ", imp_method, " completed.")
+                # print("Imputed dataset shape: ", imputed_df.shape)
+                # print("Inputed dataset columns: ", imputed_df.columns)
+                # print("")
 
+        # for imputed in imputed_datasets:
+        #     print("Type of imputed dataset: ", type(imputed))
+        
         ml_results = dict()
         
         # for each ml algorithm and imputed dataset, compute the corresponding score
         for ml_method in ml_methods:
-            print("starting ", ml_method)
+            # print("starting ", ml_method)
             scores = []
             for imputed_df in imputed_datasets:
+                # print("Imputed dataset shape: ", imputed_df.shape)
                 new_features = list(imputed_df.columns)
                 new_features.remove(class_name)
                 param = df_hyper[
@@ -139,6 +158,7 @@ def procedure(df, dataset, class_name, column, seed):
 
 
 def write_file(dataset, column, experiment, file):
+    print("Writing results for dataset ", dataset, " column ", column)
     for missing_perc in range(10): # there are ten missing percentages
         results_missing_perc = experiment[missing_perc]
         column_profile = results_missing_perc[0]
@@ -156,15 +176,23 @@ def write_file(dataset, column, experiment, file):
             file.write(new_line)
 
 def main(reduced_df=False):
-    path_datasets = "Datasets/CSV/"
-    # sempre multipli
-    n_instances_tot = 8
-    n_parallel_jobs = 8
+    print("Starting knowledge base construction...")
+    # print imputation and ml methods used
+    print("Imputation methods for numerical columns: ", imp_methods_num)
+    print("Imputation methods for categorical columns: ", imp_methods_cat)
+    print("ML methods: ", ml_methods)
 
+    path_datasets = "Datasets/CSV/"
+    new_exp_path = "NewExp/"
+    # sempre multipli
+    n_instances_tot = 1
+    n_parallel_jobs = 1
+
+    # Opening file to save the results (in the new experiments folder)
     files_numerical = []
     files_categorical = []
     for i in range(n_parallel_jobs):
-        file_num = open(f"experiment_{i+1}_numerical.csv","w")
+        file_num = open(f"{new_exp_path}experiment_{i+1}_numerical.csv","w")
         file_num.write(
             "name,column_name,n_tuples,missing_perc,uniqueness," +
             "min,max,mean,median,std,skewness,kurtosis,mad," +
@@ -174,7 +202,7 @@ def main(reduced_df=False):
             "impute_linear_regression,impute_random_forest,impute_cmeans\n")
         files_numerical.append(file_num)
 
-        file_cat = open(f"experiment_{i+1}_categorical.csv","w")
+        file_cat = open(f"{new_exp_path}experiment_{i+1}_categorical.csv","w")
         file_cat.write(
             "name,column_name,n_tuples,missing_perc,constancy,imbalance," +
             "uniqueness,unalikeability,entropy,density,mean_char,std_char,skewness_char," +
@@ -184,8 +212,15 @@ def main(reduced_df=False):
         )
         files_categorical.append(file_cat)
 
+    # # Test write on categorial file
+    # print("Test write on categorical file.")
+    # print("File name: ", files_categorical[0].name)
+    # test_line = "test_dataset,test_column,1000,0.1,0.5,0.3,0.2,0.4,1.5,0.6,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,ml_test,impute_standard_test,impute_mode_test,impute_random_test,impute_knn_test,impute_mice_test,impute_logistic_regression_test,impute_random_forest_test,impute_kproto_test\n"
+    # files_categorical[0].write(test_line)
+    # print("Test write completed.")
+
     # this files saves the seeds used for each column in the experiments, for reproducibility
-    file_seeds = open("seeds.csv", "w")
+    file_seeds = open(f"{new_exp_path}seeds.csv", "w")
     line = "name,column_name,"
     for i in range(n_parallel_jobs):
         line += f"seed_{i},"
@@ -207,19 +242,36 @@ def main(reduced_df=False):
 
         columns = list(df_fs.columns)
         columns.remove(class_name)
+        print("Columns selected after removing correlated features: ", columns)
+        columns.remove("'Length'")
+        print("Columns selected after feature selection: ", columns)
         for column in columns:
             print("ANALYZING ", column)
             if not reduced_df:
+                # print("Using full dataset for experiments.")
                 experiments = parallel_exec(df, dataset, class_name, column, n_parallel_jobs, n_instances_tot, file_seeds)
             else:
+                # print("Using reduced dataset for experiments.")
                 experiments = parallel_exec(df_fs, dataset, class_name, column, n_parallel_jobs, n_instances_tot, file_seeds)
+                # print("Experiments on column ", column, " completed.")
+                # print("Experiments results: ", experiments)
 
             # write the results of the different experiments in the corresponding files
             for i, experiment in enumerate(experiments):
                 if df[column].dtype in ["int64","float64"]:
-                    write_file(dataset, column, experiment, files_numerical[i])
+                    print("Writing results on numerical file: ", files_numerical[i].name)
+                    try:
+                        write_file(dataset, column, experiment, files_numerical[i])
+                        print("Write completed.")
+                    except Exception as e:
+                        print(f"Error writing to numerical file {files_numerical[i].name}: {e}")
                 else:
-                    write_file(dataset, column, experiment, files_categorical[i])
+                    print("Writing results on categorical file: ", files_categorical[i].name)
+                    try:
+                        write_file(dataset, column, experiment, files_categorical[i])
+                        print("Write completed.")
+                    except Exception as e:
+                        print(f"Error writing to categorical file {files_categorical[i].name}: {e}")
 
     # closing files
     for i in range(len(files_numerical)):

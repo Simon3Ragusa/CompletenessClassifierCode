@@ -42,9 +42,12 @@ class impute_expectation_maximization():
     def __init__(self):
         self.name = 'Expectation Maximization'
 
-    def fit(self, df):
+    def fit(self, df, missing_column):
+        X = df.copy()
+        col = X[missing_column]
         plugin = Imputers().get("EM")
-        df = plugin.fit_transform(df)
+        col = plugin.fit_transform(col)
+        df[missing_column] = col
         return df
 
 # Only numerical features
@@ -54,8 +57,13 @@ class impute_soft_imputer():
 
     def fit(self, df):
         # X_incomplete_normalized = BiScaler().fit_transform(df)
-        df = np.array(df).reshape(-1,1)
-        df = pd.DataFrame(SoftImpute(verbose=False).fit_transform(df))
+        df = encoding_categorical_variables(df)
+        columns = list(df.columns)
+        # df = np.array(df).reshape(-1,1)
+        imputer = SoftImpute(verbose=False)
+        df = imputer.fit_transform(df)
+        df = pd.DataFrame(df)
+        df.columns = columns
         return df
 
 # Works with both types of features
@@ -63,11 +71,32 @@ class impute_xgb_imputer():
     def __init__(self):
         self.name = 'XGB Imputer'
 
-    def fit(self, df, categorical_features_index, replace_values_back=True):
-        imputer = XGBImputer(categorical_features_index=categorical_features_index, replace_categorical_values_back=replace_values_back)
-        df = np.array(df)
-        # print("We are inside the class. Input shape: ", df.shape)
-        df = pd.DataFrame(imputer.fit_transform(df))
+    def fit(self, df, column_missing, categorical_features_index, replace_values_back=False):
+        columns = df.columns
+
+        # If type of column is object or bool, then it is categorical
+        if df.dtypes[column_missing] in ["object", "bool"]:
+            imputer = XGBImputer(categorical_features_index=categorical_features_index, replace_categorical_values_back=replace_values_back)
+            X = imputer.fit_transform(df)
+            df = pd.DataFrame(X)
+
+        else:
+            imputer = XGBImputer(categorical_features_index=categorical_features_index, replace_categorical_values_back=replace_values_back)
+            df = np.array(df)
+            # print("We are inside the class. Input shape: ", df.shape)
+            df = pd.DataFrame(imputer.fit_transform(df))
+            
+        df.columns = columns
+
+        numerical_indices = list(set(range(len(columns))) - set(categorical_features_index))
+
+        for idx in numerical_indices:
+            col_name = columns[idx]
+            df[col_name] = pd.to_numeric(df[col_name], errors='coerce')
+
+        for col in df.columns:
+            print("Column type after imputation: ", col, " ", df[col].dtype)
+                
         return df
     
 class impute_catboost():
@@ -450,7 +479,7 @@ def main():
 
     print("Columns selected for the experiments: " + str(columns))
 
-    column_to_inject_missing = columns[1]
+    column_to_inject_missing = columns[0]
     # inject missing values in the df, with different percentages. This data frame contains different versions of the column with missing values (different percentages)
     df_list_no_class = dirty_single_column(df[columns], column_to_inject_missing, class_name, 10)
 
@@ -459,10 +488,9 @@ def main():
     print("Dataset shape before imputation: ", df_list_no_class[0].shape)
     print("\n")
 
-    '''
+    
     # Lets try imputation with EM: works on numerical columns only
     imputer_em = impute_expectation_maximization()
-
     # for each version of the dataset with missing values, impute the missing values in the selected column
     imputer_soft = impute_soft_imputer()
 
@@ -473,7 +501,6 @@ def main():
     imputer_rfi = impute_rfi()
 
     imputer_autoimpute = impute_autoimpute()
-    '''
 
     imputer_gain = impute_gain()
     imputer_vae = impute_vae()
@@ -486,24 +513,28 @@ def main():
         #print(type(column_to_inject_missing))
         column_type = df_list_no_class[i][column_to_inject_missing].dtype
 
+        categorical_features_index = []
+        categorical_features = list(df_list_no_class[i].select_dtypes(include=["object", "bool"]).columns)
+        categorical_features_index = [df_list_no_class[i].columns.get_loc(col) for col in categorical_features]
+
         print("Column type: ", column_type)
         if column_type in ["int64", "float64"]:
-            print("Imputation with mlp imputer - Missing percentage: ", round(df_list_no_class[i][column_to_inject_missing].isnull().sum()/df_list_no_class[i].shape[0],2))
+            print("Imputation with xgb imputer - Missing percentage: ", round(df_list_no_class[i][column_to_inject_missing].isnull().sum()/df_list_no_class[i].shape[0],2))
             df_missing = df_list_no_class[i]
             # df_missing[class_name] = df[class_name]
-            df_imputed_mlp = imputer_mlp.fit(df_missing, column_to_inject_missing)
+            df_imputed_xgb = imputer_xgb.fit(df_missing, column_missing=column_to_inject_missing, categorical_features_index=categorical_features_index, replace_values_back=True)
             # Check if there are still missing values
-            # print("Missing values after imputation: ", df_imputed_mlp[column_to_inject_missing].isnull().sum())
-            print("Imputed: ", df_imputed_mlp.head())
+            # print("Missing values after imputation: ", df_imputed_em[column_to_inject_missing].isnull().sum())
+            print("Imputed: ", df_imputed_xgb.head())
             print("\n")
         if column_type in ["object", "bool"]:
-            print("Imputation with mlp imputer - Missing percentage: ", round(df_list_no_class[i][column_to_inject_missing].isnull().sum()/df_list_no_class[i].shape[0],2))
+            print("Imputation with xgb imputer - Missing percentage: ", round(df_list_no_class[i][column_to_inject_missing].isnull().sum()/df_list_no_class[i].shape[0],2))
             df_missing = df_list_no_class[i]
             # df_missing[class_name] = df[class_name]
-            df_imputed_mlp = imputer_mlp.fit(df_missing, column_to_inject_missing)
+            df_imputed_xgb = imputer_xgb.fit(df_missing, column_missing=column_to_inject_missing, categorical_features_index=categorical_features_index, replace_values_back=True)
             # Check if there are still missing values
-            #print("Missing values after imputation: ", df_imputed_mlp[column_to_inject_missing].isnull().sum())
-            print("Imputed: ", df_imputed_mlp.head())
+            #print("Missing values after imputation: ", df_imputed_em[column_to_inject_missing].isnull().sum())
+            print("Imputed: ", df_imputed_xgb.head())
             print("\n")
 
 

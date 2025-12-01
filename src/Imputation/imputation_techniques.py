@@ -387,20 +387,29 @@ class impute_expectation_maximization():
     def __init__(self):
         self.name = 'Expectation Maximization'
 
-    def fit(self, df):
+    def fit(self, df, missing_column):
+        X = df.copy()
+        col = X[missing_column]
         plugin = Imputers().get("EM")
-        tmp = plugin.fit_transform(df)
-        return tmp
+        col = plugin.fit_transform(col)
+        df[missing_column] = col
+        return df
 
 # Only numerical features
-class impute_soft_impute():
+class impute_soft_imputer():
     def __init__(self):
-        self.name = 'Soft Impute'
+        self.name = 'Soft Imputer'
 
     def fit(self, df):
+        # print("Inside soft imputer")
         # X_incomplete_normalized = BiScaler().fit_transform(df)
-        df = np.array(df).reshape(-1,1)
-        df = pd.DataFrame(SoftImpute(verbose=False).fit_transform(df))
+        df = encoding_categorical_variables(df)
+        columns = list(df.columns)
+        # df = np.array(df).reshape(-1,1)
+        imputer = SoftImpute(verbose=False)
+        df = imputer.fit_transform(df)
+        df = pd.DataFrame(df)
+        df.columns = columns
         return df
 
 # Works with both types of features
@@ -408,11 +417,32 @@ class impute_xgb_imputer():
     def __init__(self):
         self.name = 'XGB Imputer'
 
-    def fit(self, df, categorical_features_index, replace_values_back=True):
-        imputer = XGBImputer(categorical_features_index=categorical_features_index, replace_categorical_values_back=replace_values_back)
-        df = np.array(df)
-        # print("We are inside the class. Input shape: ", df.shape)
-        df = pd.DataFrame(imputer.fit_transform(df))
+    def fit(self, df, column_missing, categorical_features_index, replace_values_back=False):
+        columns = df.columns
+
+        # If type of column is object or bool, then it is categorical
+        if df.dtypes[column_missing] in ["object", "bool"]:
+            imputer = XGBImputer(categorical_features_index=categorical_features_index, replace_categorical_values_back=replace_values_back)
+            X = imputer.fit_transform(df)
+            df = pd.DataFrame(X)
+
+        else:
+            imputer = XGBImputer(categorical_features_index=categorical_features_index, replace_categorical_values_back=replace_values_back)
+            df = np.array(df)
+            # print("We are inside the class. Input shape: ", df.shape)
+            df = pd.DataFrame(imputer.fit_transform(df))
+            
+        df.columns = columns
+
+        numerical_indices = list(set(range(len(columns))) - set(categorical_features_index))
+
+        for idx in numerical_indices:
+            col_name = columns[idx]
+            df[col_name] = pd.to_numeric(df[col_name], errors='coerce')
+
+        # for col in df.columns:
+        #     print("Column type after imputation: ", col, " ", df[col].dtype)
+                
         return df
 
 class impute_catboost():
@@ -422,9 +452,9 @@ class impute_catboost():
     def fit(self, df, missing_column):
 
         type_missing = df.dtypes[missing_column]
-        #missing_column = df[missing_column]
-        print("Type missing: ", type_missing)
-        X = df.copy()
+        # missing_column = df[missing_column]
+        # print("Type missing: ", type_missing)
+        X = df.copy()   
 
         # Select categorical features from the dataset
         cat_features = list(df.select_dtypes(include=["object", "bool"]).columns)
@@ -435,8 +465,8 @@ class impute_catboost():
             missing = X[X[missing_column].isnull()]
 
             X_train = fully_available_samples.drop(columns = [missing_column])
-            print("X_train type: ", type(X_train))
-            print("X_train shape: ", X_train.shape)
+            # print("X_train type: ", type(X_train))
+            # print("X_train shape: ", X_train.shape)
             y_train = fully_available_samples[missing_column]
 
             X_pred = missing.drop(columns = [missing_column])
@@ -454,7 +484,7 @@ class impute_catboost():
 
             if len(fully_available_samples) > 1 and len(missing) > 0:
                 imputer.fit(X_train, y_train, cat_features=cat_features)
-                print(type(df))
+                # print(type(df))
                 df.loc[df[missing_column].isnull(), missing_column] = imputer.predict(X_pred)
                 df = pd.DataFrame(df)
                 return df
@@ -494,7 +524,7 @@ class impute_catboost():
                 df = pd.DataFrame(df)
                 return df
 
-            print("Debug")
+            # print("Debug")
             return 0
 
 # Both kind of features
@@ -519,6 +549,10 @@ class impute_rfi():
         kernel.mice(3)
 
         df = kernel.complete_data()
+
+        for col in df.select_dtypes(include=["category"]).columns:
+            df[col] = df[col].astype('object')
+        
         return df
 
 # To test
@@ -526,11 +560,39 @@ class impute_autoimpute():
     def __init__(self):
         self.name = 'Autoimpute'
 
+    '''
     def fit(self, df):
         mice = MiceImputer(return_list=True)
         mice = mice.fit(df)
         df = pd.DataFrame(mice.transform(df))
         return df
+    
+    '''
+    def fit(self, df):
+        # 🛑 FIX: Use a strategy that doesn't use MCMC sampling (PyMC)
+        # 'least_squares' is fast and standard for MICE, but less robust than PMM.
+        # 'stochastic' adds random noise to regression (closer to PMM concept).
+        mice = MiceImputer(
+            return_list=True,
+            strategy='least squares',
+        )
+        
+        df = encoding_categorical_variables(df)
+        # converto boolean columns to float
+        for col in df.select_dtypes(include=["bool"]).columns:
+            df[col] = df[col].astype(float)
+        # Execute imputation
+        mice_generator = mice.fit_transform(df)
+        
+        # Extract the DataFrame from the generator/list output
+        # (Autoimpute's return structure can vary based on return_list=True)
+        try:
+            # Usually returns (imputation_index, dataframe) tuples
+            df_imputed = list(mice_generator)[0][1] 
+        except TypeError:
+            df_imputed = mice_generator
+
+        return pd.DataFrame(df_imputed)
 
 # Both GAIN and VAE work with both types of features
 class impute_gain():
@@ -768,15 +830,16 @@ def impute_missing_column(df, method, missing_column):
     # ===================================================================
     elif method == "impute_expectation_maximization":
         imputator = impute_expectation_maximization()
-        imputated_df = imputator.fit(df)
-    elif method == "impute_soft_impute":
-        imputator = impute_soft_impute()
+        imputated_df = imputator.fit(df, missing_column)
+    elif method == "impute_soft_imputer":
+        # print("Using soft imputer===============================================================")
+        imputator = impute_soft_imputer()
         imputated_df = imputator.fit(df)
     elif method == "impute_xgb_imputer":
         imputator = impute_xgb_imputer()
         categorical_features = list(df.select_dtypes(include=["object", "bool"]).columns)
         categorical_features_index = [df.columns.get_loc(col) for col in categorical_features]
-        imputated_df = imputator.fit(df, categorical_features_index)
+        imputated_df = imputator.fit(df, missing_column, categorical_features_index, replace_values_back=True)
     elif method == "impute_catboost":
         imputator = impute_catboost()
         imputated_df = imputator.fit(df, missing_column)
