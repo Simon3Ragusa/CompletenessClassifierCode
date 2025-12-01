@@ -96,7 +96,7 @@ def procedure(df, dataset, class_name, column, seed):
 
             # impute the numerical column with all the imputation methods
             for imp_method in imp_methods_num:
-                #print("[", imp_method, "]")
+                print("[", imp_method, "]")
                 current_df = df_missing.copy()
                 imputed_df = impute_missing_column(current_df, imp_method,
                                                    column)
@@ -105,7 +105,7 @@ def procedure(df, dataset, class_name, column, seed):
                 imputed_df[class_name] = df[class_name]
                 imputed_datasets.append(imputed_df)
                 # print("Imputation with method ", imp_method, " completed.")
-                # print("Imputed dataset shape: ", imputed_df.shape)
+                print("Imputed dataset shape: ", imputed_df.shape)
                 # print("Inputed dataset columns: ", imputed_df.columns)
                 # print("")
 

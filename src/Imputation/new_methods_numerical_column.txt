@@ -5,4 +5,5 @@ impute_catboost
 impute_rfi
 impute_autoimpute
 impute_gain
+impute_vae
 impute_mlp
