@@ -26,6 +26,7 @@ file_imp_methods_num = open("Imputation/new_methods_numerical_column.txt", "r")
 file_imp_methods_cat = open("Imputation/new_methods_categorical_column.txt", "r")
 
 datasets = file_datasets.readlines()
+ # removing adult dataset for now
 ml_methods = file_ml_methods.readlines()
 imp_methods_num = file_imp_methods_num.readlines()
 imp_methods_cat = file_imp_methods_cat.readlines()
@@ -38,7 +39,7 @@ imp_methods_cat = [line.strip('\n\r') for line in imp_methods_cat]
 # this dataframe contains the value of the parameters to train the ml algorithms
 df_hyper = pd.read_csv("Hyperparameter_tuning/hyperparameters.csv")
 
-
+# datasets = [ds for ds in datasets if ds != "abalone"] 
 # generate seeds for the different parallel jobs
 def generate_seed(n_seed, n_elements):
     seed = []
@@ -104,16 +105,13 @@ def procedure(df, dataset, class_name, column, seed):
                 # add the class column back to the imputed dataframe
                 imputed_df[class_name] = df[class_name]
                 imputed_datasets.append(imputed_df)
-                # print("Imputation with method ", imp_method, " completed.")
-                print("Imputed dataset shape: ", imputed_df.shape)
-                # print("Inputed dataset columns: ", imputed_df.columns)
-                # print("")
+                print("Imputation with method ", imp_method, " completed.")
 
         if column_type in ["bool", "object"]:
             column_profile = get_features_cat(df_missing, column)
             # impute the categorical column with all the imputation methods
             for imp_method in imp_methods_cat:
-                # print("[", imp_method, "]")
+                print("[", imp_method, "]")   
                 current_df = df_missing.copy()
                 imputed_df = impute_missing_column(current_df, imp_method,
                                                    column)
@@ -124,7 +122,7 @@ def procedure(df, dataset, class_name, column, seed):
                 # add the class column back to the imputed dataframe
                 imputed_df[class_name] = df[class_name]
                 imputed_datasets.append(imputed_df)
-                # print("Imputation with method ", imp_method, " completed.")
+                print("Imputation with method ", imp_method, " completed.")
                 # print("Imputed dataset shape: ", imputed_df.shape)
                 # print("Inputed dataset columns: ", imputed_df.columns)
                 # print("")
@@ -134,9 +132,9 @@ def procedure(df, dataset, class_name, column, seed):
         
         ml_results = dict()
         
-        # for each ml algorithm and imputed dataset, compute the corresponding score
+        print("Starting ML evaluation...")
         for ml_method in ml_methods:
-            # print("starting ", ml_method)
+            print("starting ", ml_method)
             scores = []
             for imputed_df in imputed_datasets:
                 # print("Imputed dataset shape: ", imputed_df.shape)
@@ -154,6 +152,9 @@ def procedure(df, dataset, class_name, column, seed):
 
         results_experiment[i] = [column_profile, ml_results]
 
+        print("/=======================================================/")
+        print("Experiment for iteration ", i, " completed.")
+        print("/=======================================================/")
     return results_experiment
 
 
@@ -199,7 +200,9 @@ def main(reduced_df=False):
             "iqr,p_min,p_max,k_min,k_max,s_min,s_max,entropy," +
             "density,ml_algorithm,impute_standard,impute_mean," +
             "impute_median,impute_random,impute_knn,impute_mice," +
-            "impute_linear_regression,impute_random_forest,impute_cmeans\n")
+            "impute_linear_regression,impute_random_forest,impute_cmeans\n"
+        )
+        print("Numerical file header written.")
         files_numerical.append(file_num)
 
         file_cat = open(f"{new_exp_path}experiment_{i+1}_categorical.csv","w")
@@ -210,6 +213,7 @@ def main(reduced_df=False):
             "impute_mode,impute_random,impute_knn,impute_mice,impute_logistic_regression," +
             "impute_random_forest,impute_kproto\n"
         )
+        print("Categorical file header written.")
         files_categorical.append(file_cat)
 
     # # Test write on categorial file
@@ -229,8 +233,8 @@ def main(reduced_df=False):
     file_seeds.write(line)
 
     # here starts the main loop on datasets and columns
-    # datasets = ["default of credit card clients", "frogs", "mushrooms", "ringnorm"]
-    for dataset in datasets:
+    print("Datasets to analyze: ", datasets)
+    for dataset in datasets:  # removing adult dataset for now
         print("------------" + dataset + "------------")
         df = get_dataset(path_datasets,dataset + ".csv")
         class_name = df.columns[-1]

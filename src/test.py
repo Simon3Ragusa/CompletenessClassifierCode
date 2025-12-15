@@ -197,7 +197,8 @@ class impute_rfi():
         kernel = mf.ImputationKernel(
             data=df,
             save_all_iterations_data=True,
-            random_state=42
+            random_state=42,
+            mean_match_candidates=0
         )
 
         kernel.mice(3)
@@ -415,9 +416,11 @@ class impute_mlp_manual():
                 return df
 
             X_train = train_data.drop(columns=[missing_column])
+            X_train = encoding_categorical_variables(X_train)
             y_train = train_data[missing_column]
 
             X_predict = predict_data.drop(columns=[missing_column])
+            X_predict = encoding_categorical_variables(X_predict)
 
             # Fit the model and predict missing values
             mlp_estimator.fit(X_train, y_train)
@@ -446,9 +449,11 @@ class impute_mlp_manual():
                 return df
 
             X_train = train_data.drop(columns=[missing_column])
+            X_train = encoding_categorical_variables(X_train)
             y_train = train_data[missing_column]
 
             X_predict = predict_data.drop(columns=[missing_column])
+            X_predict = encoding_categorical_variables(X_predict)
 
             # Fit the model and predict missing values
             mlp_estimator.fit(X_train, y_train)
@@ -462,7 +467,7 @@ class impute_mlp_manual():
         
 def main():
     path_datasets = "Datasets/CSV/"
-    dataset = "abalone"
+    dataset = "BachChoralHarmony"
     df = get_dataset(path_datasets,dataset + ".csv")
 
     print("------------" + dataset + "------------")
@@ -479,7 +484,8 @@ def main():
 
     print("Columns selected for the experiments: " + str(columns))
 
-    column_to_inject_missing = columns[0]
+    column_to_inject_missing = columns[2]
+    print(type(column_to_inject_missing))
     # inject missing values in the df, with different percentages. This data frame contains different versions of the column with missing values (different percentages)
     df_list_no_class = dirty_single_column(df[columns], column_to_inject_missing, class_name, 10)
 
@@ -522,19 +528,19 @@ def main():
             print("Imputation with xgb imputer - Missing percentage: ", round(df_list_no_class[i][column_to_inject_missing].isnull().sum()/df_list_no_class[i].shape[0],2))
             df_missing = df_list_no_class[i]
             # df_missing[class_name] = df[class_name]
-            df_imputed_xgb = imputer_xgb.fit(df_missing, column_missing=column_to_inject_missing, categorical_features_index=categorical_features_index, replace_values_back=True)
+            df_imputed_rfi = imputer_mlp.fit(df_missing, missing_column=column_to_inject_missing)
             # Check if there are still missing values
             # print("Missing values after imputation: ", df_imputed_em[column_to_inject_missing].isnull().sum())
-            print("Imputed: ", df_imputed_xgb.head())
+            print("Imputed: ", df_imputed_rfi.head())
             print("\n")
         if column_type in ["object", "bool"]:
             print("Imputation with xgb imputer - Missing percentage: ", round(df_list_no_class[i][column_to_inject_missing].isnull().sum()/df_list_no_class[i].shape[0],2))
             df_missing = df_list_no_class[i]
             # df_missing[class_name] = df[class_name]
-            df_imputed_xgb = imputer_xgb.fit(df_missing, column_missing=column_to_inject_missing, categorical_features_index=categorical_features_index, replace_values_back=True)
+            df_imputed_rfi = imputer_mlp.fit(df_missing, missing_column=column_to_inject_missing)
             # Check if there are still missing values
             #print("Missing values after imputation: ", df_imputed_em[column_to_inject_missing].isnull().sum())
-            print("Imputed: ", df_imputed_xgb.head())
+            print("Imputed: ", df_imputed_rfi.head())
             print("\n")
 
 

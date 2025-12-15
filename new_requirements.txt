@@ -13,5 +13,5 @@ hyperimpute
 fancyimpute
 xgbimputer
 catboost
-miceforest~=6.0.5
+miceforest
 autoimpute

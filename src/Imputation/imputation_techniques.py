@@ -542,8 +542,9 @@ class impute_rfi():
         
         kernel = mf.ImputationKernel(
             data=df,
-            save_all_iterations_data=True,
-            random_state=42
+            # save_all_iterations_data=True,
+            random_state=42,
+            mean_match_candidates=0
         )
 
         kernel.mice(3)
@@ -750,7 +751,6 @@ class impute_mlp():
             return df
         
         else:
-
             mlp_estimator = MLPClassifier(
                 random_state=42, 
                 solver='adam', 
@@ -767,9 +767,11 @@ class impute_mlp():
                 return df
 
             X_train = train_data.drop(columns=[missing_column])
+            X_train = encoding_categorical_variables(X_train)
             y_train = train_data[missing_column]
 
             X_predict = predict_data.drop(columns=[missing_column])
+            X_predict = encoding_categorical_variables(X_predict)
 
             # Fit the model and predict missing values
             mlp_estimator.fit(X_train, y_train)
