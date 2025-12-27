@@ -400,6 +400,8 @@ class impute_mlp_manual():
 
             X = encoding_categorical_variables(X)
 
+            print("Data after encoding: ", X.head())
+    
             mlp_estimator = MLPRegressor(
                 random_state=42, 
                 solver='adam', 
@@ -416,11 +418,14 @@ class impute_mlp_manual():
                 return df
 
             X_train = train_data.drop(columns=[missing_column])
-            X_train = encoding_categorical_variables(X_train)
+            # X_train = encoding_categorical_variables(X_train)
             y_train = train_data[missing_column]
 
             X_predict = predict_data.drop(columns=[missing_column])
-            X_predict = encoding_categorical_variables(X_predict)
+            # X_predict = encoding_categorical_variables(X_predict)
+
+            print("X_train shape: ", X_train.shape)
+            print("y_train shape: ", y_train.shape)
 
             # Fit the model and predict missing values
             mlp_estimator.fit(X_train, y_train)
@@ -432,6 +437,14 @@ class impute_mlp_manual():
             return df
         
         else:
+            
+            features = X.drop(columns=[missing_column])
+            target = X[missing_column]
+
+            features = encoding_categorical_variables(features)
+            X_train = features.loc[target.notnull()]
+            y_train = target.loc[target.notnull()]
+            X_predict = features.loc[target.isnull()]
 
             mlp_estimator = MLPClassifier(
                 random_state=42, 
@@ -441,19 +454,26 @@ class impute_mlp_manual():
                 early_stopping=True
             )
 
-            # Split the data into training and prediction sets
-            train_data = X[X[missing_column].notnull()]
-            predict_data = X[X[missing_column].isnull()]
+            # # Split the data into training and prediction sets
+            # train_data = X[X[missing_column].notnull()]
+            # predict_data = X[X[missing_column].isnull()]
 
-            if len(predict_data) == 0:
+            if len(X_predict) == 0:
                 return df
 
-            X_train = train_data.drop(columns=[missing_column])
-            X_train = encoding_categorical_variables(X_train)
-            y_train = train_data[missing_column]
+            # X_train = train_data.drop(columns=[missing_column])
+            # y_train = train_data[missing_column]
 
-            X_predict = predict_data.drop(columns=[missing_column])
-            X_predict = encoding_categorical_variables(X_predict)
+            # X_predict = predict_data.drop(columns=[missing_column])
+
+            # cat_cols = list(X.select_dtypes(include=['object', 'bool']).columns)
+            # num_cols = list(X.select_dtypes(exclude=['object', 'bool']).columns)
+
+            # encoder = OneHotEncoder(handle_unknown="ignore", sparse=False)
+            # encoder.fit(X_train[cat_cols])
+
+            # X_train = encoding_categorical_variables(X_train)   
+            # X_predict = encoding_categorical_variables(X_predict)
 
             # Fit the model and predict missing values
             mlp_estimator.fit(X_train, y_train)
@@ -467,7 +487,7 @@ class impute_mlp_manual():
         
 def main():
     path_datasets = "Datasets/CSV/"
-    dataset = "BachChoralHarmony"
+    dataset = "abalone"
     df = get_dataset(path_datasets,dataset + ".csv")
 
     print("------------" + dataset + "------------")
@@ -484,7 +504,7 @@ def main():
 
     print("Columns selected for the experiments: " + str(columns))
 
-    column_to_inject_missing = columns[2]
+    column_to_inject_missing = columns[1]
     print(type(column_to_inject_missing))
     # inject missing values in the df, with different percentages. This data frame contains different versions of the column with missing values (different percentages)
     df_list_no_class = dirty_single_column(df[columns], column_to_inject_missing, class_name, 10)
@@ -528,19 +548,19 @@ def main():
             print("Imputation with xgb imputer - Missing percentage: ", round(df_list_no_class[i][column_to_inject_missing].isnull().sum()/df_list_no_class[i].shape[0],2))
             df_missing = df_list_no_class[i]
             # df_missing[class_name] = df[class_name]
-            df_imputed_rfi = imputer_mlp.fit(df_missing, missing_column=column_to_inject_missing)
+            df_imputed_mlp = imputer_mlp.fit(df_missing, missing_column=column_to_inject_missing)
             # Check if there are still missing values
             # print("Missing values after imputation: ", df_imputed_em[column_to_inject_missing].isnull().sum())
-            print("Imputed: ", df_imputed_rfi.head())
+            print("Imputed: ", df_imputed_mlp.head())
             print("\n")
         if column_type in ["object", "bool"]:
             print("Imputation with xgb imputer - Missing percentage: ", round(df_list_no_class[i][column_to_inject_missing].isnull().sum()/df_list_no_class[i].shape[0],2))
             df_missing = df_list_no_class[i]
             # df_missing[class_name] = df[class_name]
-            df_imputed_rfi = imputer_mlp.fit(df_missing, missing_column=column_to_inject_missing)
+            df_imputed_mlp = imputer_mlp.fit(df_missing, missing_column=column_to_inject_missing)
             # Check if there are still missing values
             #print("Missing values after imputation: ", df_imputed_em[column_to_inject_missing].isnull().sum())
-            print("Imputed: ", df_imputed_rfi.head())
+            print("Imputed: ", df_imputed_mlp.head())
             print("\n")
 
 

@@ -39,7 +39,8 @@ imp_methods_cat = [line.strip('\n\r') for line in imp_methods_cat]
 # this dataframe contains the value of the parameters to train the ml algorithms
 df_hyper = pd.read_csv("Hyperparameter_tuning/hyperparameters.csv")
 
-# datasets = [ds for ds in datasets if ds != "abalone"] 
+done_ds = ['abalone', 'BachChoralHarmony', 'bank', 'cancer', 'car', 'consumer', 'dataset_188_kropt', 'default of credit card clients', 'diabetic', 'drug', 'electricity-normalized', 'fried', 'frogs', 'german']
+datasets = [ds for ds in datasets if ds not in done_ds] 
 # generate seeds for the different parallel jobs
 def generate_seed(n_seed, n_elements):
     seed = []
@@ -85,6 +86,7 @@ def procedure(df, dataset, class_name, column, seed):
     results_experiment = dict()
 
     column_profile = ()
+    
     for i, df_missing in enumerate(df_list_no_class):
         column_type = df[column].dtype
 
@@ -100,7 +102,7 @@ def procedure(df, dataset, class_name, column, seed):
                 print("[", imp_method, "]")
                 current_df = df_missing.copy()
                 imputed_df = impute_missing_column(current_df, imp_method,
-                                                   column)
+                                                column)
                 imputed_df = encoding_categorical_variables(imputed_df)
                 # add the class column back to the imputed dataframe
                 imputed_df[class_name] = df[class_name]
@@ -113,8 +115,9 @@ def procedure(df, dataset, class_name, column, seed):
             for imp_method in imp_methods_cat:
                 print("[", imp_method, "]")   
                 current_df = df_missing.copy()
+                
                 imputed_df = impute_missing_column(current_df, imp_method,
-                                                   column)
+                                                column)
                 # print("Imputed dataset shape: ", imputed_df.shape)
                 # print("Inputed column unique values: ", imputed_df[column].unique())
                 imputed_df = encoding_categorical_variables(imputed_df)
@@ -126,7 +129,6 @@ def procedure(df, dataset, class_name, column, seed):
                 # print("Imputed dataset shape: ", imputed_df.shape)
                 # print("Inputed dataset columns: ", imputed_df.columns)
                 # print("")
-
         # for imputed in imputed_datasets:
         #     print("Type of imputed dataset: ", type(imputed))
         
@@ -142,11 +144,11 @@ def procedure(df, dataset, class_name, column, seed):
                 new_features.remove(class_name)
                 param = df_hyper[
                     np.logical_and(df_hyper["ml_method"] == ml_method,
-                                   df_hyper["dataset"] == dataset)][
+                                df_hyper["dataset"] == dataset)][
                     "best_parameter"].values[0]
                 ml_score = classification(imputed_df[new_features],
-                                          imputed_df[class_name], ml_method,
-                                          param)
+                                        imputed_df[class_name], ml_method,
+                                        param)
                 scores.append(ml_score)
             ml_results[ml_method] = scores
 
@@ -234,6 +236,7 @@ def main(reduced_df=False):
 
     # here starts the main loop on datasets and columns
     print("Datasets to analyze: ", datasets)
+    errors = []
     for dataset in datasets:  # removing adult dataset for now
         print("------------" + dataset + "------------")
         df = get_dataset(path_datasets,dataset + ".csv")
@@ -241,39 +244,55 @@ def main(reduced_df=False):
 
         # feature selection
         # df_fs, _, _, _, _ = feature_selection_univariate(df, class_name, perc_num=50, perc_cat=60)
-        df_corr_removed = remove_corr(df, class_name, threshold=0.8)
-        df_fs = fixed_fs_univariate(df_corr_removed, class_name)
-
+        try:
+            df_corr_removed = remove_corr(df, class_name, threshold=0.8)
+            df_fs = fixed_fs_univariate(df_corr_removed, class_name)
+        except Exception as e:
+            print(f"Error during feature selection for dataset {dataset}: {e}")
+            errors.append((dataset, "feature_selection", str(e)))
+            continue
         columns = list(df_fs.columns)
         columns.remove(class_name)
         print("Columns selected after removing correlated features: ", columns)
         for column in columns:
-            print("ANALYZING ", column)
-            if not reduced_df:
-                # print("Using full dataset for experiments.")
-                experiments = parallel_exec(df, dataset, class_name, column, n_parallel_jobs, n_instances_tot, file_seeds)
-            else:
-                # print("Using reduced dataset for experiments.")
-                experiments = parallel_exec(df_fs, dataset, class_name, column, n_parallel_jobs, n_instances_tot, file_seeds)
-                # print("Experiments on column ", column, " completed.")
-                # print("Experiments results: ", experiments)
-
-            # write the results of the different experiments in the corresponding files
-            for i, experiment in enumerate(experiments):
-                if df[column].dtype in ["int64","float64"]:
-                    print("Writing results on numerical file: ", files_numerical[i].name)
-                    try:
-                        write_file(dataset, column, experiment, files_numerical[i])
-                        print("Write completed.")
-                    except Exception as e:
-                        print(f"Error writing to numerical file {files_numerical[i].name}: {e}")
+            try:
+                print("ANALYZING ", column)
+                if not reduced_df:
+                    # print("Using full dataset for experiments.")
+                    experiments = parallel_exec(df, dataset, class_name, column, n_parallel_jobs, n_instances_tot, file_seeds)
                 else:
-                    print("Writing results on categorical file: ", files_categorical[i].name)
-                    try:
-                        write_file(dataset, column, experiment, files_categorical[i])
-                        print("Write completed.")
-                    except Exception as e:
-                        print(f"Error writing to categorical file {files_categorical[i].name}: {e}")
+                    # print("Using reduced dataset for experiments.")
+                    experiments = parallel_exec(df_fs, dataset, class_name, column, n_parallel_jobs, n_instances_tot, file_seeds)
+                    # print("Experiments on column ", column, " completed.")
+                    # print("Experiments results: ", experiments)
+
+                # write the results of the different experiments in the corresponding files
+                for i, experiment in enumerate(experiments):
+                    if df[column].dtype in ["int64","float64"]:
+                        print("Writing results on numerical file: ", files_numerical[i].name)
+                        try:
+                            write_file(dataset, column, experiment, files_numerical[i])
+                            print("Write completed.")
+                        except Exception as e:
+                            print(f"Error writing to numerical file {files_numerical[i].name}: {e}")
+                    else:
+                        print("Writing results on categorical file: ", files_categorical[i].name)
+                        try:
+                            write_file(dataset, column, experiment, files_categorical[i])
+                            print("Write completed.")
+                        except Exception as e:
+                            print(f"Error writing to categorical file {files_categorical[i].name}: {e}")
+            except Exception as e:
+                print(f"Error in main loop for dataset {dataset}, column {column}: {e}")
+                errors.append((dataset, column, str(e)))
+                continue
+        
+    # print errors if any
+    if errors:
+        with open(f"{new_exp_path}errors_log.txt", "w") as error_file:
+            for err in errors:
+                error_file.write(f"Dataset: {err[0]}, Column: {err[1]}, Error: {err[2]}\n")
+        print(f"Errors logged in {new_exp_path}errors_log.txt")
 
     # closing files
     for i in range(len(files_numerical)):

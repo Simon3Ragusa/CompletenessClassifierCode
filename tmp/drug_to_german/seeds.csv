@@ -1,0 +1,31 @@
+name,column_name,seed_0,seed_1,seed_2,seed_3,seed_4,seed_5,seed_6,seed_7
+cancer,Uniformity_of_Cell_Size,71,49,1,17,28,36,70,23
+cancer,Bare_Nuclei,61,69,50,20,84,35,49,28
+cancer,Bland_Chromatin,51,98,88,88,11,71,2,71
+car,doors,12,96,49,37,89,76,78,44
+car,persons,15,53,50,59,98,58,23,77
+car,lug_boot,66,66,48,98,92,54,37,16
+default of credit card clients,x6,32,35,75,39,48,93,28,97
+default of credit card clients,x7,45,78,71,90,27,50,81,14
+default of credit card clients,x8,46,17,83,21,57,25,81,74
+drug,Age,95,22,74,0,23,62,23,60
+drug,Na_to_K,92,13,53,42,69,37,45,66
+drug,Sex,18,39,2,25,28,16,48,59
+drug,BP,32,33,24,18,38,54,19,0
+drug,Cholesterol,28,20,16,47,10,17,47,63
+electricity-normalized,nswprice,95,10,40,73,57,23,42,99
+electricity-normalized,nswdemand,34,66,63,36,59,82,43,57
+electricity-normalized,vicdemand,18,16,68,45,50,62,88,93
+electricity-normalized,day,16,80,3,9,27,82,83,19
+fried,X1,55,68,84,33,22,89,76,2
+fried,X2,7,42,54,4,43,28,84,86
+fried,X4,13,84,99,37,2,87,90,29
+frogs,MFCCs_13,68,29,10,5,21,28,41,6
+frogs,MFCCs_15,5,49,85,3,73,33,51,80
+frogs,MFCCs_22,69,24,33,78,96,94,1,36
+german,Age,96,80,9,24,54,46,59,6
+german,Credit_amount,37,12,28,31,40,25,93,91
+german,Duration,28,64,2,11,85,81,2,35
+german,Saving_accounts,29,6,35,38,82,93,51,94
+german,Checking_account,27,43,86,23,18,66,33,73
+german,Purpose,23,56,37,8,82,30,7,79

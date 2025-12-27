@@ -420,6 +420,10 @@ class impute_xgb_imputer():
     def fit(self, df, column_missing, categorical_features_index, replace_values_back=False):
         columns = df.columns
 
+        # check if categorical features index is empty
+        if len(categorical_features_index) == 0:
+            categorical_features_index = []
+
         # If type of column is object or bool, then it is categorical
         if df.dtypes[column_missing] in ["object", "bool"]:
             imputer = XGBImputer(categorical_features_index=categorical_features_index, replace_categorical_values_back=replace_values_back)
@@ -711,7 +715,7 @@ class impute_vae():
 # Both
 class impute_mlp():
     def __init__(self):
-        self.name = 'MLP Imputer'
+        self.name = 'MLP Impute Manual'
 
     def fit(self, df: pd.DataFrame, missing_column) -> pd.DataFrame:
         X = df.copy()
@@ -721,6 +725,8 @@ class impute_mlp():
 
             X = encoding_categorical_variables(X)
 
+            print("Data after encoding: ", X.head())
+    
             mlp_estimator = MLPRegressor(
                 random_state=42, 
                 solver='adam', 
@@ -737,9 +743,14 @@ class impute_mlp():
                 return df
 
             X_train = train_data.drop(columns=[missing_column])
+            # X_train = encoding_categorical_variables(X_train)
             y_train = train_data[missing_column]
 
             X_predict = predict_data.drop(columns=[missing_column])
+            # X_predict = encoding_categorical_variables(X_predict)
+
+            print("X_train shape: ", X_train.shape)
+            print("y_train shape: ", y_train.shape)
 
             # Fit the model and predict missing values
             mlp_estimator.fit(X_train, y_train)
@@ -751,6 +762,15 @@ class impute_mlp():
             return df
         
         else:
+            
+            features = X.drop(columns=[missing_column])
+            target = X[missing_column]
+
+            features = encoding_categorical_variables(features)
+            X_train = features.loc[target.notnull()]
+            y_train = target.loc[target.notnull()]
+            X_predict = features.loc[target.isnull()]
+
             mlp_estimator = MLPClassifier(
                 random_state=42, 
                 solver='adam', 
@@ -759,19 +779,26 @@ class impute_mlp():
                 early_stopping=True
             )
 
-            # Split the data into training and prediction sets
-            train_data = X[X[missing_column].notnull()]
-            predict_data = X[X[missing_column].isnull()]
+            # # Split the data into training and prediction sets
+            # train_data = X[X[missing_column].notnull()]
+            # predict_data = X[X[missing_column].isnull()]
 
-            if len(predict_data) == 0:
+            if len(X_predict) == 0:
                 return df
 
-            X_train = train_data.drop(columns=[missing_column])
-            X_train = encoding_categorical_variables(X_train)
-            y_train = train_data[missing_column]
+            # X_train = train_data.drop(columns=[missing_column])
+            # y_train = train_data[missing_column]
 
-            X_predict = predict_data.drop(columns=[missing_column])
-            X_predict = encoding_categorical_variables(X_predict)
+            # X_predict = predict_data.drop(columns=[missing_column])
+
+            # cat_cols = list(X.select_dtypes(include=['object', 'bool']).columns)
+            # num_cols = list(X.select_dtypes(exclude=['object', 'bool']).columns)
+
+            # encoder = OneHotEncoder(handle_unknown="ignore", sparse=False)
+            # encoder.fit(X_train[cat_cols])
+
+            # X_train = encoding_categorical_variables(X_train)   
+            # X_predict = encoding_categorical_variables(X_predict)
 
             # Fit the model and predict missing values
             mlp_estimator.fit(X_train, y_train)

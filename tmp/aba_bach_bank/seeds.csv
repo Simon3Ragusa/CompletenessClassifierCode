@@ -1,0 +1,15 @@
+name,column_name,seed_0,seed_1,seed_2,seed_3,seed_4,seed_5,seed_6,seed_7
+abalone,'Length',62,85,65,30,1,47,14,30
+abalone,'Sex',50,48,54,12,16,62,46,39
+BachChoralHarmony,V2,59,9,80,72,92,92,10,82
+BachChoralHarmony,V16,1,46,74,50,99,49,34,37
+BachChoralHarmony,V1,43,42,25,26,91,59,17,89
+BachChoralHarmony,V6,4,79,51,99,16,51,72,22
+BachChoralHarmony,V15,74,28,73,40,51,95,51,86
+bank,duration,71,4,77,22,82,92,84,78
+bank,pdays,59,89,9,5,8,28,48,95
+bank,previous,31,92,6,29,83,74,20,40
+bank,housing,93,90,22,98,87,41,65,27
+bank,contact,99,95,90,21,46,73,53,98
+bank,month,15,42,24,69,37,90,58,97
+cancer,Uniformity_of_Cell_Size,50,41,28,70,94,91,58,92

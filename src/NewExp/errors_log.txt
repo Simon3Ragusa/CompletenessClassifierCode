@@ -1,0 +1,34 @@
+Dataset: house, Column: feature_selection, Error: Input X contains NaN.
+SelectKBest does not accept missing values encoded as NaN natively. For supervised learning, you might want to consider sklearn.ensemble.HistGradientBoostingClassifier and Regressor which accept missing values encoded as NaNs natively. Alternatively, it is possible to preprocess the data, for instance by using an imputer transformer in a pipeline or drop samples with missing values. See https://scikit-learn.org/stable/modules/impute.html You can find a list of all estimators that handle NaN values at the following page: https://scikit-learn.org/stable/modules/impute.html#estimators-that-handle-nan-values
+Dataset: iris, Column: sepal_length, Error: arrays used as indices must be of integer (or boolean) type
+Dataset: iris, Column: sepal_width, Error: arrays used as indices must be of integer (or boolean) type
+Dataset: letter, Column: y-bar, Error: arrays used as indices must be of integer (or boolean) type
+Dataset: letter, Column: x2ybr, Error: arrays used as indices must be of integer (or boolean) type
+Dataset: letter, Column: x-ege, Error: arrays used as indices must be of integer (or boolean) type
+Dataset: mushrooms, Column: GillSize, Error: Found array with 0 feature(s) (shape=(4021, 0)) while a minimum of 1 is required by SimpleImputer.
+Dataset: mushrooms, Column: RingType, Error: Found array with 0 feature(s) (shape=(4021, 0)) while a minimum of 1 is required by SimpleImputer.
+Dataset: mushrooms, Column: SporePrintColor, Error: Found array with 0 feature(s) (shape=(4021, 0)) while a minimum of 1 is required by SimpleImputer.
+Dataset: numerai28.6, Column: attribute_4, Error: arrays used as indices must be of integer (or boolean) type
+Dataset: numerai28.6, Column: attribute_10, Error: arrays used as indices must be of integer (or boolean) type
+Dataset: numerai28.6, Column: attribute_12, Error: arrays used as indices must be of integer (or boolean) type
+Dataset: nursery, Column: 'parents', Error: Found array with 0 feature(s) (shape=(12960, 0)) while a minimum of 1 is required by SimpleImputer.
+Dataset: nursery, Column: 'children', Error: Found array with 0 feature(s) (shape=(12960, 0)) while a minimum of 1 is required by SimpleImputer.
+Dataset: nursery, Column: 'health', Error: Found array with 0 feature(s) (shape=(12960, 0)) while a minimum of 1 is required by SimpleImputer.
+Dataset: phoneme, Column: V1, Error: arrays used as indices must be of integer (or boolean) type
+Dataset: phoneme, Column: V3, Error: arrays used as indices must be of integer (or boolean) type
+Dataset: phoneme, Column: V4, Error: arrays used as indices must be of integer (or boolean) type
+Dataset: ringnorm, Column: V9, Error: arrays used as indices must be of integer (or boolean) type
+Dataset: ringnorm, Column: V14, Error: arrays used as indices must be of integer (or boolean) type
+Dataset: ringnorm, Column: V19, Error: arrays used as indices must be of integer (or boolean) type
+Dataset: Run_or_walk_information, Column: acceleration_x, Error: arrays used as indices must be of integer (or boolean) type
+Dataset: Run_or_walk_information, Column: acceleration_y, Error: arrays used as indices must be of integer (or boolean) type
+Dataset: Run_or_walk_information, Column: acceleration_z, Error: arrays used as indices must be of integer (or boolean) type
+Dataset: shuttle, Column: A1, Error: arrays used as indices must be of integer (or boolean) type
+Dataset: shuttle, Column: A2, Error: arrays used as indices must be of integer (or boolean) type
+Dataset: shuttle, Column: A7, Error: arrays used as indices must be of integer (or boolean) type
+Dataset: soybean, Column: leaf-mild, Error: Found array with 0 feature(s) (shape=(249, 0)) while a minimum of 1 is required by SimpleImputer.
+Dataset: soybean, Column: sclerotia, Error: Found array with 0 feature(s) (shape=(249, 0)) while a minimum of 1 is required by SimpleImputer.
+Dataset: soybean, Column: fruit-spots, Error: Found array with 0 feature(s) (shape=(249, 0)) while a minimum of 1 is required by SimpleImputer.
+Dataset: wall-robot-navigation, Column: V1, Error: arrays used as indices must be of integer (or boolean) type
+Dataset: wall-robot-navigation, Column: V2, Error: arrays used as indices must be of integer (or boolean) type
+Dataset: wall-robot-navigation, Column: V4, Error: arrays used as indices must be of integer (or boolean) type
