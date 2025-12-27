@@ -1,4 +1,4 @@
-name,column_name,n_tuples,missing_perc,constancy,imbalance,uniqueness,unalikeability,entropy,density,mean_char,std_char,skewness_char,kurtosis_char,min_char,max_char,ml_method,impute_standard,impute_mode,impute_random,impute_knn,impute_mice,impute_logistic_regression,impute_random_forest,impute_kproto
+name,column_name,n_tuples,missing_perc,constancy,imbalance,uniqueness,unalikeability,entropy,density,mean_char,std_char,skewness_char,kurtosis_char,min_char,max_char,ml_method,impute_xgb_imputer,impute_catboost,impute_rfi,impute_mlp
 abalone,'Sex',4177.0,0.504,0.3634,1.1693,0.0014,0.6655,1.0964,1.5817,1.0,0.0,,,1.0,1.0,DecisionTree,0.2106560212442824,0.2103893062461898,0.2122510116174767,0.2098455579707243,,,,
 abalone,'Sex',4177.0,0.504,0.3634,1.1693,0.0014,0.6655,1.0964,1.5817,1.0,0.0,,,1.0,1.0,LogisticRegression,0.2233232255941182,0.2231973829457769,0.2239976118132054,0.2284932286628054,,,,
 abalone,'Sex',4177.0,0.504,0.3634,1.1693,0.0014,0.6655,1.0964,1.5817,1.0,0.0,,,1.0,1.0,KNN,0.1940766918279962,0.1960507435119712,0.1911348727667758,0.2035155508890384,,,,
